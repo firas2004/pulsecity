@@ -1,0 +1,19 @@
+---
+# ── PulseCity — Anomaly Detector Service ─────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: anomaly-detector
+  namespace: default
+  labels:
+    app: anomaly-detector
+    project: pulsecity
+spec:
+  selector:
+    app: anomaly-detector
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+      protocol: TCP
+  type: ClusterIP

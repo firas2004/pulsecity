@@ -1,0 +1,54 @@
+# ── PulseCity – Kafka Helm values (Bitnami, config légère pour Kind local) ──
+# Chart : oci://registry-1.docker.io/bitnamicharts/kafka
+# Mode  : KRaft (sans ZooKeeper, Kafka ≥ 3.3)
+
+# 1 seul nœud combiné controller + broker
+controller:
+  replicaCount: 1
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
+
+# Désactiver la persistence (pas besoin de PV pour le dev local)
+persistence:
+  enabled: false
+
+# Listeners : PLAINTEXT uniquement (pas de TLS pour simplifier)
+listeners:
+  client:
+    protocol: PLAINTEXT
+  controller:
+    protocol: PLAINTEXT
+  interbroker:
+    protocol: PLAINTEXT
+
+# Désactiver les métriques / extras inutiles en local
+metrics:
+  kafka:
+    enabled: false
+  jmx:
+    enabled: false
+
+# Auto-créer les topics (pratique pour le dev)
+provisioning:
+  enabled: true
+  topics:
+    - name: traffic-data
+      partitions: 1
+      replicationFactor: 1
+    - name: air-quality
+      partitions: 1
+      replicationFactor: 1
+    - name: noise-level
+      partitions: 1
+      replicationFactor: 1
+    - name: energy-data
+      partitions: 1
+      replicationFactor: 1
+    - name: alerts
+      partitions: 1
+      replicationFactor: 1

@@ -1,0 +1,57 @@
+---
+# ── Network Policy : IoT Simulator ───────────────────────────────────────────
+# Permet à iot-simulator de :
+#   EGRESS  → Kafka sur le port 9092 (namespace kafka)
+#   EGRESS  → DNS (kube-dns, port 53 UDP+TCP) pour résolution des noms
+#   INGRESS → Prometheus pour scraper les métriques (port 8001)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-iot-simulator
+  namespace: default
+  labels:
+    project: pulsecity
+    security: network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: iot-simulator
+
+  policyTypes:
+    - Ingress
+    - Egress
+
+  # ── Trafic entrant autorisé ──────────────────────────────────────────────
+  ingress:
+    # Prometheus scrape sur le port métriques (8001)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 8001
+
+  # ── Trafic sortant autorisé ──────────────────────────────────────────────
+  egress:
+    # Communication avec Kafka (namespace kafka, port 9092)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kafka
+      ports:
+        - protocol: TCP
+          port: 9092
+        - protocol: TCP
+          port: 9093  # KRaft controller
+
+    # Résolution DNS (kube-dns dans kube-system)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53

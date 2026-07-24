@@ -1,0 +1,99 @@
+---
+# ── PulseCity — Règles d'alerte Prometheus ───────────────────────────────────
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: pulsecity-alerts
+  namespace: monitoring
+  labels:
+    app: kube-prometheus-stack
+    release: kube-prometheus-stack
+spec:
+  groups:
+    # ── Alertes IoT ─────────────────────────────────────────────────────────
+    - name: pulsecity.iot
+      interval: 30s
+      rules:
+        - alert: TauxAnomaliesEleve
+          expr: |
+            sum(rate(pulsecity_anomalies_total[1m])) > 0.1
+          for: 1m
+          labels:
+            severity: warning
+            project: pulsecity
+          annotations:
+            summary: "Taux d'anomalies IoT élevé"
+            description: "Plus de 5 anomalies par minute détectées (actuel: {{ $value | printf \"%.2f\" }}/s)"
+
+        - alert: SimulateurIoTArrete
+          expr: |
+            absent(pulsecity_messages_sent_total)
+          for: 2m
+          labels:
+            severity: critical
+            project: pulsecity
+          annotations:
+            summary: "Simulateur IoT ne produit plus de données"
+            description: "Aucune métrique pulsecity_messages_sent_total depuis 2 minutes"
+
+        - alert: DetecteurAnomaliesArrete
+          expr: |
+            absent(pulsecity_messages_consumed_total)
+          for: 2m
+          labels:
+            severity: critical
+            project: pulsecity
+          annotations:
+            summary: "Anomaly Detector ne consomme plus de messages"
+            description: "Aucune métrique pulsecity_messages_consumed_total depuis 2 minutes"
+
+    # ── Alertes Infrastructure ───────────────────────────────────────────────
+    - name: pulsecity.infra
+      interval: 30s
+      rules:
+        - alert: PodCPUEleve
+          expr: |
+            rate(container_cpu_usage_seconds_total{
+              namespace=~"default|kafka",
+              container!="",
+              container!="POD"
+            }[5m]) > 0.8
+          for: 2m
+          labels:
+            severity: warning
+            project: pulsecity
+          annotations:
+            summary: "CPU élevé sur le pod {{ $labels.pod }}"
+            description: "Le container {{ $labels.container }} utilise {{ $value | printf \"%.0f\" }}% CPU"
+
+        - alert: PodMemoryElevee
+          expr: |
+            container_memory_working_set_bytes{
+              namespace=~"default|kafka",
+              container!="",
+              container!="POD"
+            } / container_spec_memory_limit_bytes{
+              namespace=~"default|kafka",
+              container!="",
+              container!="POD"
+            } > 0.85
+          for: 2m
+          labels:
+            severity: warning
+            project: pulsecity
+          annotations:
+            summary: "Mémoire élevée sur le pod {{ $labels.pod }}"
+            description: "Le container {{ $labels.container }} utilise >85% de sa mémoire limite"
+
+        - alert: PodRedemarrageFréquent
+          expr: |
+            increase(kube_pod_container_status_restarts_total{
+              namespace=~"default|kafka"
+            }[10m]) > 2
+          for: 0m
+          labels:
+            severity: warning
+            project: pulsecity
+          annotations:
+            summary: "Redémarrages fréquents du pod {{ $labels.pod }}"
+            description: "{{ $labels.container }} a redémarré {{ $value }} fois en 10 minutes"

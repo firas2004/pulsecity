@@ -1,0 +1,146 @@
+---
+# ── PulseCity — Backend V2 Deployment (Production Hardened) ──────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-v2
+  namespace: default
+  labels:
+    app: backend-v2
+    project: pulsecity
+    version: v2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-v2
+  template:
+    metadata:
+      labels:
+        app: backend-v2
+        project: pulsecity
+        version: v2
+    spec:
+      enableServiceLinks: false
+
+      # ── Sécurité du Pod ───────────────────────────────────────────────────
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
+      initContainers:
+        - name: wait-for-kafka
+          image: busybox:1.36
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z kafka.kafka.svc.cluster.local 9092; do
+                echo "En attente de Kafka...";
+                sleep 5;
+              done;
+              echo "Kafka prêt !"
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 50m
+              memory: 32Mi
+
+      containers:
+        - name: backend-v2
+          image: pulsecity-backend:v3
+          imagePullPolicy: IfNotPresent
+
+          # ── Sécurité du conteneur ────────────────────────────────────────
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+
+          ports:
+            - name: http
+              containerPort: 8002
+              protocol: TCP
+
+          env:
+            - name: DATABASE_URL
+              value: "sqlite:////app/data/pulsecity.db"
+            - name: JWT_SECRET
+              value: "change-me"
+            - name: KAFKA_BROKER
+              value: "kafka.kafka.svc.cluster.local:9092"
+            - name: ANOMALY_DETECTOR_URL
+              value: "http://anomaly-detector.default.svc.cluster.local:8000"
+            - name: OPENWEATHERMAP_API_KEY
+              value: ""
+            - name: GROQ_API_KEY
+              value: ""
+            - name: PYTHONUNBUFFERED
+              value: "1"
+            - name: FORCE_RESTART
+              value: "20260713-new-code-v3"
+            - name: BACKEND_URL
+              value: "http://backend-v2.default.svc.cluster.local:8002"
+
+          # ── Ressources (CPU + Mémoire) ───────────────────────────────────
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+
+          # ── Sondes de santé ───────────────────────────────────────────────
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8002
+              scheme: HTTP
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 5
+            successThreshold: 1
+            timeoutSeconds: 5
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8002
+              scheme: HTTP
+            initialDelaySeconds: 20
+            periodSeconds: 20
+            failureThreshold: 3
+            successThreshold: 1
+            timeoutSeconds: 5
+
+          # Volumes temporaires pour l'écriture de SQLite et des fichiers temporaires
+          volumeMounts:
+            - name: db-data
+              mountPath: /app/data
+            - name: tmp-dir
+              mountPath: /tmp
+
+      volumes:
+        - name: db-data
+          emptyDir: {}
+        - name: tmp-dir
+          emptyDir: {}
+
+      restartPolicy: Always

@@ -1,0 +1,10 @@
+# PulseCity — Anomaly Detector v2 — dépendances Python
+# wheel>=0.46.2 : corrige CVE-2026-24049 (Privilege Escalation via malicious wheel file)
+wheel>=0.46.2
+kafka-python==2.0.2
+scikit-learn==1.4.2
+numpy==1.26.4
+pandas==2.2.2
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+prometheus-client==0.20.0

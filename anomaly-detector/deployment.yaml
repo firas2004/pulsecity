@@ -1,0 +1,80 @@
+---
+# ── PulseCity — Anomaly Detector Deployment ──────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: anomaly-detector
+  namespace: default
+  labels:
+    app: anomaly-detector
+    project: pulsecity
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: anomaly-detector
+  template:
+    metadata:
+      labels:
+        app: anomaly-detector
+        project: pulsecity
+        version: v1
+    spec:
+      enableServiceLinks: false
+      # Attendre que Kafka soit disponible avant de démarrer le détecteur
+      initContainers:
+        - name: wait-for-kafka
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z kafka.kafka.svc.cluster.local 9092; do
+                echo "En attente de Kafka...";
+                sleep 5;
+              done;
+              echo "Kafka prêt !"
+      containers:
+        - name: anomaly-detector
+          image: pulsecity-anomaly-detector:v1
+          imagePullPolicy: Never
+          ports:
+            - name: http
+              containerPort: 8000
+          env:
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "kafka.kafka.svc.cluster.local:9092"
+            - name: WINDOW_SIZE
+              value: "50"
+            - name: MIN_SAMPLES
+              value: "15"
+            - name: ANOMALY_THRESHOLD
+              value: "-0.05"
+            - name: API_PORT
+              value: "8000"
+            - name: PYTHONUNBUFFERED
+              value: "1"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          # Vérifier que FastAPI répond
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            failureThreshold: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            failureThreshold: 3
+      restartPolicy: Always

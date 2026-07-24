@@ -1,0 +1,22 @@
+---
+# ── ServiceMonitor : anomaly-detector (port 8000, /metrics) ─────────────────
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: anomaly-detector
+  namespace: monitoring
+  labels:
+    app: anomaly-detector
+    release: kube-prometheus-stack
+spec:
+  namespaceSelector:
+    matchNames:
+      - default
+  selector:
+    matchLabels:
+      app: anomaly-detector
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+      scrapeTimeout: 10s

@@ -1,0 +1,75 @@
+# ── PulseCity — kube-prometheus-stack : config légère pour Kind / Windows ────
+# Chart : prometheus-community/kube-prometheus-stack
+# Usage : helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
+#           -n monitoring --values prometheus-values.yaml
+
+# ── Prometheus ───────────────────────────────────────────────────────────────
+prometheus:
+  prometheusSpec:
+    # Retention courte (dev local)
+    retention: 12h
+    # Scraper TOUS les ServiceMonitors du cluster (pas seulement ceux du namespace monitoring)
+    serviceMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorSelector: {}
+    serviceMonitorNamespaceSelector: {}
+    # Scraper les PodMonitors aussi
+    podMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelector: {}
+    # Pas de PVC (emptyDir pour le dev)
+    storageSpec: {}
+    resources:
+      requests:
+        memory: 400Mi
+        cpu: 100m
+      limits:
+        memory: 800Mi
+        cpu: 400m
+
+# ── Grafana ──────────────────────────────────────────────────────────────────
+grafana:
+  adminPassword: "pulsecity123"   # mot de passe admin Grafana
+  persistence:
+    enabled: false
+  # Charger automatiquement les dashboards depuis les ConfigMaps labelisés
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      labelValue: "1"
+      searchNamespace: ALL
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 50m
+    limits:
+      memory: 256Mi
+      cpu: 200m
+
+# ── Alertmanager ─────────────────────────────────────────────────────────────
+alertmanager:
+  alertmanagerSpec:
+    storage: {}
+    resources:
+      requests:
+        memory: 64Mi
+        cpu: 25m
+      limits:
+        memory: 128Mi
+        cpu: 100m
+
+# ── Désactiver les composants non-exposés dans Kind ─────────────────────────
+# (Kind ne publie pas les métriques de ces composants)
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: false
+kubeEtcd:
+  enabled: false
+
+# ── node-exporter & kube-state-metrics : garder activés ─────────────────────
+nodeExporter:
+  enabled: true
+kubeStateMetrics:
+  enabled: true

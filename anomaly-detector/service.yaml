@@ -1,0 +1,21 @@
+---
+# ── PulseCity — Anomaly Detector Service ─────────────────────────────────────
+# Service ClusterIP : expose l'API REST en interne dans le cluster
+# Utilisé pour kubectl port-forward et pour les futurs microservices consommateurs
+apiVersion: v1
+kind: Service
+metadata:
+  name: anomaly-detector
+  namespace: default
+  labels:
+    app: anomaly-detector
+    project: pulsecity
+spec:
+  selector:
+    app: anomaly-detector
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+      protocol: TCP
+  type: ClusterIP

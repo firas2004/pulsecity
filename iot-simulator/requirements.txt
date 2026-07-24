@@ -1,0 +1,6 @@
+# PulseCity IoT Simulator v4 — dépendances Python
+# wheel>=0.46.2 : corrige CVE-2026-24049 (Privilege Escalation via malicious wheel file)
+wheel>=0.46.2
+kafka-python==2.0.2
+prometheus-client==0.20.0
+requests>=2.31.0

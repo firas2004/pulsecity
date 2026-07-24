@@ -1,0 +1,51 @@
+---
+# ── Network Policy : Frontend ────────────────────────────────────────────────
+# Permet au pod pulsecity-frontend de :
+#   INGRESS ← Accès HTTP sur le port 80 depuis n'importe où
+#   EGRESS  → backend-v2 sur le port 8002 pour le proxy d'API et WebSockets
+#   EGRESS  → DNS (kube-dns, port 53 UDP+TCP) pour la résolution du nom backend-v2
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-frontend
+  namespace: default
+  labels:
+    project: pulsecity
+    security: network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: pulsecity-frontend
+
+  policyTypes:
+    - Ingress
+    - Egress
+
+  # ── Trafic entrant autorisé ──────────────────────────────────────────────
+  ingress:
+    # Autoriser l'accès externe à Nginx sur le port 80
+    - ports:
+        - protocol: TCP
+          port: 80
+
+  # ── Trafic sortant autorisé ──────────────────────────────────────────────
+  egress:
+    # 1. Résolution DNS (kube-dns dans kube-system)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+    # 2. Accès au service backend-v2 (port 8002)
+    - to:
+        - podSelector:
+            matchLabels:
+              app: backend-v2
+      ports:
+        - protocol: TCP
+          port: 8002

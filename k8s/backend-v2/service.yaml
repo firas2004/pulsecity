@@ -1,0 +1,19 @@
+---
+# ── PulseCity — Backend V2 Service ───────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-v2
+  namespace: default
+  labels:
+    app: backend-v2
+    project: pulsecity
+spec:
+  selector:
+    app: backend-v2
+  ports:
+    - name: http
+      port: 8002
+      targetPort: 8002
+      protocol: TCP
+  type: ClusterIP

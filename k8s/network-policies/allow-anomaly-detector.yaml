@@ -1,0 +1,65 @@
+---
+# ── Network Policy : Anomaly Detector ─────────────────────────────────────────
+# Permet à anomaly-detector de :
+#   EGRESS  → Kafka (consumer + producer) sur le port 9092
+#   EGRESS  → DNS pour résolution des noms
+#   INGRESS → Tout client interne au namespace default (API REST /anomalies /health)
+#   INGRESS → Prometheus pour scraper /metrics (port 8000)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-anomaly-detector
+  namespace: default
+  labels:
+    project: pulsecity
+    security: network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: anomaly-detector
+
+  policyTypes:
+    - Ingress
+    - Egress
+
+  # ── Trafic entrant autorisé ──────────────────────────────────────────────
+  ingress:
+    # API REST (port 8000) — accès interne au namespace default
+    - from:
+        - podSelector: {}   # Tous les pods du namespace default
+      ports:
+        - protocol: TCP
+          port: 8000
+
+    # Prometheus scrape /metrics (port 8000) depuis le namespace monitoring
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 8000
+
+  # ── Trafic sortant autorisé ──────────────────────────────────────────────
+  egress:
+    # Kafka (consumer + producer) sur le port 9092
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kafka
+      ports:
+        - protocol: TCP
+          port: 9092
+        - protocol: TCP
+          port: 9093
+
+    # Résolution DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53

@@ -1,0 +1,74 @@
+---
+# ── Network Policy : Backend V2 ──────────────────────────────────────────────
+# Permet à backend-v2 de :
+#   EGRESS  → Kafka sur le port 9092 (namespace kafka)
+#   EGRESS  → DNS (kube-dns, port 53 UDP+TCP) pour résolution des noms
+#   EGRESS  → Anomaly Detector sur le port 8000 (namespace default)
+#   EGRESS  → Internet (Groq API, OpenWeatherMap API) sur les ports 80 et 443 TCP
+#   INGRESS → Port 8002 depuis n'importe où (API REST + WebSockets)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-backend-v2
+  namespace: default
+  labels:
+    project: pulsecity
+    security: network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: backend-v2
+
+  policyTypes:
+    - Ingress
+    - Egress
+
+  # ── Trafic entrant autorisé ──────────────────────────────────────────────
+  ingress:
+    # Autoriser l'accès externe à l'API FastAPI et aux WebSockets sur le port 8002
+    - ports:
+        - protocol: TCP
+          port: 8002
+
+  # ── Trafic sortant autorisé ──────────────────────────────────────────────
+  egress:
+    # 1. Communication avec Kafka (namespace kafka, ports 9092/9093)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kafka
+      ports:
+        - protocol: TCP
+          port: 9092
+        - protocol: TCP
+          port: 9093
+
+    # 2. Résolution DNS (kube-dns dans kube-system)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+    # 3. Accès à l'anomaly-detector (namespace default, port 8000)
+    - to:
+        - podSelector:
+            matchLabels:
+              app: anomaly-detector
+      ports:
+        - protocol: TCP
+          port: 8000
+
+    # 4. Accès Internet pour les API externes (Groq API, OpenWeatherMap)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 443

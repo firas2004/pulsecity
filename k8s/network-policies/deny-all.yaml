@@ -1,0 +1,17 @@
+---
+# ── Network Policy : DENY ALL par défaut ─────────────────────────────────────
+# Bloque tout le trafic ingress ET egress non explicitement autorisé.
+# Posture "Zero Trust" : seul le trafic nécessaire est permis.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: default
+  labels:
+    project: pulsecity
+    security: network-policy
+spec:
+  podSelector: {}   # S'applique à TOUS les pods du namespace
+  policyTypes:
+    - Ingress
+    - Egress

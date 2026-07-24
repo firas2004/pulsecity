@@ -1,0 +1,120 @@
+---
+# ── ConfigMap : Dashboard Grafana "PulseCity — IoT en Temps Réel" ────────────
+# Grafana sidecar détecte automatiquement ce ConfigMap grâce au label grafana_dashboard=1
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pulsecity-iot-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  pulsecity-iot.json: |
+    {
+      "title": "PulseCity \u2014 IoT en Temps R\u00e9el",
+      "uid": "pulsecity-iot-v1",
+      "description": "Surveillance temps r\u00e9el des capteurs urbains tunisiens (trafic, CO2, bruit, \u00e9nergie)",
+      "tags": ["pulsecity", "iot"],
+      "style": "dark",
+      "timezone": "browser",
+      "refresh": "5s",
+      "time": {"from": "now-30m", "to": "now"},
+      "schemaVersion": 38,
+      "version": 1,
+      "graphTooltip": 1,
+      "panels": [
+        {
+          "id": 1, "type": "stat", "title": "\ud83d\udce8 Messages Envoy\u00e9s",
+          "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}]}, "unit": "short"}, "overrides": []},
+          "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+          "targets": [{"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum(pulsecity_messages_sent_total)", "legendFormat": "Total", "refId": "A"}]
+        },
+        {
+          "id": 2, "type": "stat", "title": "\u26a0 Anomalies D\u00e9tect\u00e9es (IA)",
+          "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 10}, {"color": "red", "value": 50}]}, "unit": "short"}, "overrides": []},
+          "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+          "targets": [{"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum(pulsecity_anomalies_total)", "legendFormat": "Anomalies IA", "refId": "A"}]
+        },
+        {
+          "id": 3, "type": "stat", "title": "\ud83d\udce1 Capteurs Actifs",
+          "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}, "unit": "short"}, "overrides": []},
+          "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+          "targets": [{"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "pulsecity_active_sensors", "legendFormat": "Capteurs", "refId": "A"}]
+        },
+        {
+          "id": 4, "type": "stat", "title": "\u23f1 Latence Traitement p95",
+          "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 0.1}, {"color": "red", "value": 0.5}]}, "unit": "s", "decimals": 3}, "overrides": []},
+          "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+          "targets": [{"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "histogram_quantile(0.95, rate(pulsecity_processing_latency_seconds_bucket[5m]))", "legendFormat": "p95", "refId": "A"}]
+        },
+        {
+          "id": 5, "type": "timeseries", "title": "\ud83d\udcc8 D\u00e9bit Messages par Type de Capteur (msg/s)",
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"lineWidth": 2, "fillOpacity": 10, "spanNulls": false}, "unit": "ops"}, "overrides": []},
+          "options": {"tooltip": {"mode": "multi"}, "legend": {"displayMode": "list", "placement": "bottom"}},
+          "targets": [
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum by(sensor_type) (rate(pulsecity_messages_sent_total[1m]))", "legendFormat": "{{sensor_type}}", "refId": "A"}
+          ]
+        },
+        {
+          "id": 6, "type": "timeseries", "title": "\ud83d\udea8 Taux d'Anomalies par Zone (anomalie/s)",
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"lineWidth": 2, "fillOpacity": 15, "spanNulls": false}, "unit": "ops"}, "overrides": []},
+          "options": {"tooltip": {"mode": "multi"}, "legend": {"displayMode": "list", "placement": "bottom"}},
+          "targets": [
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum by(zone) (rate(pulsecity_anomalies_total[2m]))", "legendFormat": "{{zone}}", "refId": "A"}
+          ]
+        },
+        {
+          "id": 7, "type": "timeseries", "title": "\ud83e\udd16 Anomalies Simul\u00e9es vs D\u00e9tect\u00e9es par IA",
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"lineWidth": 2, "fillOpacity": 5}, "unit": "ops"}, "overrides": []},
+          "options": {"tooltip": {"mode": "multi"}, "legend": {"displayMode": "table", "placement": "bottom"}},
+          "targets": [
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum(rate(pulsecity_anomalies_simulated_total[1m]))", "legendFormat": "Simul\u00e9es (10% al\u00e9atoire)", "refId": "A"},
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum(rate(pulsecity_anomalies_total[1m]))", "legendFormat": "D\u00e9tect\u00e9es (Isolation Forest)", "refId": "B"}
+          ]
+        },
+        {
+          "id": 8, "type": "bargauge", "title": "\ud83d\udcca Anomalies par Capteur et Zone",
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "unit": "short", "min": 0}, "overrides": []},
+          "options": {"displayMode": "gradient", "orientation": "horizontal", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "showUnfilled": true},
+          "targets": [
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sort_desc(sum by(zone, sensor_type) (pulsecity_anomalies_total))", "legendFormat": "{{zone}} / {{sensor_type}}", "refId": "A", "instant": true}
+          ]
+        },
+        {
+          "id": 9, "type": "timeseries", "title": "\ud83d\udcbb CPU Pods PulseCity (%)",
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 20},
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"lineWidth": 2, "fillOpacity": 10}, "unit": "percentunit", "max": 1}, "overrides": []},
+          "options": {"tooltip": {"mode": "multi"}, "legend": {"displayMode": "list", "placement": "bottom"}},
+          "targets": [
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "rate(container_cpu_usage_seconds_total{namespace=~\"default|kafka\", container!=\"\", container!=\"POD\"}[5m])", "legendFormat": "{{pod}} / {{container}}", "refId": "A"}
+          ]
+        },
+        {
+          "id": 10, "type": "timeseries", "title": "\ud83d\udcbe M\u00e9moire Pods PulseCity (MiB)",
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 20},
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"lineWidth": 2, "fillOpacity": 10}, "unit": "bytes"}, "overrides": []},
+          "options": {"tooltip": {"mode": "multi"}, "legend": {"displayMode": "list", "placement": "bottom"}},
+          "targets": [
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "container_memory_working_set_bytes{namespace=~\"default|kafka\", container!=\"\", container!=\"POD\"}", "legendFormat": "{{pod}} / {{container}}", "refId": "A"}
+          ]
+        }
+      ]
+    }

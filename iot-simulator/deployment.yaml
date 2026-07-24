@@ -1,0 +1,67 @@
+---
+# ── PulseCity – IoT Simulator Deployment v3 (Kafka + Prometheus metrics) ─────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iot-simulator
+  namespace: default
+  labels:
+    app: iot-simulator
+    project: pulsecity
+    version: v3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: iot-simulator
+  template:
+    metadata:
+      labels:
+        app: iot-simulator
+        project: pulsecity
+        version: v3
+    spec:
+      enableServiceLinks: false
+      initContainers:
+        - name: wait-for-kafka
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z kafka.kafka.svc.cluster.local 9092; do
+                echo "En attente de Kafka...";
+                sleep 5;
+              done;
+              echo "Kafka prêt !"
+      containers:
+        - name: sensor
+          image: pulsecity-sensor:v3
+          imagePullPolicy: Never
+          ports:
+            - name: metrics
+              containerPort: 8001    # Port Prometheus scraping
+          env:
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "kafka.kafka.svc.cluster.local:9092"
+            - name: SEND_INTERVAL_SECONDS
+              value: "5"
+            - name: ANOMALY_PROBABILITY
+              value: "0.10"
+            - name: METRICS_PORT
+              value: "8001"
+            - name: PYTHONUNBUFFERED
+              value: "1"
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "300m"
+          livenessProbe:
+            exec:
+              command: ["pgrep", "-f", "sensor.py"]
+            initialDelaySeconds: 30
+            periodSeconds: 30
+      restartPolicy: Always

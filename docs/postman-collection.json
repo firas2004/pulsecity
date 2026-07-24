@@ -1,0 +1,314 @@
+{
+  "info": {
+    "name": "PulseCity API — Collection Postman",
+    "description": "Collection complète des endpoints API de la plateforme PulseCity.\n\nPré-requis : exposer l'anomaly-detector localement :\n```\nkubectl port-forward svc/anomaly-detector 8000:8000\n```\n\nVarables : base_url = http://localhost:8000",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "2.0.0"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "description": "URL de base de l'anomaly-detector (après kubectl port-forward)"
+    },
+    {
+      "key": "anomaly_limit",
+      "value": "20",
+      "description": "Nombre max d'anomalies retournées"
+    }
+  ],
+  "item": [
+    {
+      "name": "🏥 Health Check",
+      "item": [
+        {
+          "name": "GET /health — État du service",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            },
+            "description": "Retourne l'état de santé du service anomaly-detector avec les statistiques de traitement Kafka et le nombre d'anomalies détectées."
+          },
+          "response": [
+            {
+              "name": "✅ 200 — Service OK",
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"status\": \"ok\",\n  \"service\": \"pulsecity-anomaly-detector\",\n  \"version\": \"2.0.0\",\n  \"kafka_bootstrap\": \"kafka.kafka.svc.cluster.local:9092\",\n  \"window_size\": 50,\n  \"min_samples\": 15,\n  \"anomaly_threshold\": -0.05,\n  \"total_messages_consumed\": 1247,\n  \"total_anomalies_detected\": 89,\n  \"active_sensors\": 24,\n  \"started_at\": \"2026-07-04T08:00:00Z\"\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Service is ok', () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.status).to.eql('ok');",
+                  "});",
+                  "pm.test('Has statistics', () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.total_messages_consumed).to.be.a('number');",
+                  "    pm.expect(body.active_sensors).to.be.a('number');",
+                  "});",
+                  "pm.test('Response time < 200ms', () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🚨 Anomalies",
+      "item": [
+        {
+          "name": "GET /anomalies — Liste (défaut limit=20)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/anomalies?limit={{anomaly_limit}}",
+              "host": ["{{base_url}}"],
+              "path": ["anomalies"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "{{anomaly_limit}}",
+                  "description": "Nombre maximum d'anomalies à retourner (1-100)"
+                }
+              ]
+            },
+            "description": "Retourne les N dernières anomalies détectées par l'algorithme Isolation Forest, triées du plus récent au plus ancien."
+          },
+          "response": [
+            {
+              "name": "✅ 200 — Anomalies détectées",
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"count\": 2,\n  \"anomalies\": [\n    {\n      \"timestamp\": \"2026-07-04T09:00:05Z\",\n      \"detected_at\": \"2026-07-04T09:00:06Z\",\n      \"sensor_id\": \"sfax-energy-001\",\n      \"sensor_type\": \"energy\",\n      \"zone\": \"Sfax\",\n      \"value\": 1342.0,\n      \"unit\": \"kWh\",\n      \"isolation_score\": -0.2891,\n      \"confidence\": 0.578,\n      \"anomaly\": true,\n      \"alert_level\": \"MEDIUM\",\n      \"source\": \"isolation-forest-v2\",\n      \"message\": \"[IA] Anomalie sur energy à Sfax : 1342.0 kWh (score=-0.2891, conf=58%)\"\n    }\n  ]\n}"
+            },
+            {
+              "name": "✅ 200 — Aucune anomalie (démarrage récent)",
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"count\": 0,\n  \"anomalies\": []\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has count field', () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('count');",
+                  "    pm.expect(body).to.have.property('anomalies');",
+                  "});",
+                  "pm.test('Count matches array length', () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.count).to.eql(body.anomalies.length);",
+                  "});",
+                  "pm.test('Count <= limit', () => {",
+                  "    const body = pm.response.json();",
+                  "    const limit = parseInt(pm.request.url.query.get('limit') || '100');",
+                  "    pm.expect(body.count).to.be.at.most(limit);",
+                  "});",
+                  "if (pm.response.json().count > 0) {",
+                  "    pm.test('Anomaly has required fields', () => {",
+                  "        const anomaly = pm.response.json().anomalies[0];",
+                  "        pm.expect(anomaly).to.have.all.keys(",
+                  "            'timestamp', 'zone', 'sensor_type', 'value',",
+                  "            'isolation_score', 'alert_level', 'anomaly'",
+                  "        );",
+                  "    });",
+                  "    pm.test('alert_level is HIGH or MEDIUM', () => {",
+                  "        const anomaly = pm.response.json().anomalies[0];",
+                  "        pm.expect(['HIGH', 'MEDIUM']).to.include(anomaly.alert_level);",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /anomalies?limit=5 — Limite réduite",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/anomalies?limit=5",
+              "host": ["{{base_url}}"],
+              "path": ["anomalies"],
+              "query": [{ "key": "limit", "value": "5" }]
+            },
+            "description": "Test de la pagination : retourne au maximum 5 anomalies."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Max 5 anomalies', () => {",
+                  "    pm.expect(pm.response.json().count).to.be.at.most(5);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /anomalies?limit=100 — Limite maximale",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/anomalies?limit=100",
+              "host": ["{{base_url}}"],
+              "path": ["anomalies"],
+              "query": [{ "key": "limit", "value": "100" }]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Max 100 anomalies', () => {",
+                  "    pm.expect(pm.response.json().count).to.be.at.most(100);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "📊 Métriques Prometheus",
+      "item": [
+        {
+          "name": "GET /metrics — Format Prometheus",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "text/plain" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/metrics",
+              "host": ["{{base_url}}"],
+              "path": ["metrics"]
+            },
+            "description": "Endpoint scrappé par Prometheus toutes les 15 secondes. Retourne les métriques au format text/plain Prometheus."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Content-Type is text/plain', () => {",
+                  "    pm.expect(pm.response.headers.get('Content-Type')).to.include('text/plain');",
+                  "});",
+                  "pm.test('Contains pulsecity metrics', () => {",
+                  "    const body = pm.response.text();",
+                  "    pm.expect(body).to.include('pulsecity_');",
+                  "});",
+                  "pm.test('Contains anomalies counter', () => {",
+                  "    pm.expect(pm.response.text()).to.include('pulsecity_anomalies_total');",
+                  "});",
+                  "pm.test('Contains messages counter', () => {",
+                  "    pm.expect(pm.response.text()).to.include('pulsecity_messages_consumed_total');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "📖 Documentation",
+      "item": [
+        {
+          "name": "GET /docs — Swagger UI",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/docs",
+              "host": ["{{base_url}}"],
+              "path": ["docs"]
+            },
+            "description": "Interface Swagger générée automatiquement par FastAPI."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Swagger UI is accessible', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /openapi.json — OpenAPI Schema",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/openapi.json",
+              "host": ["{{base_url}}"],
+              "path": ["openapi.json"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('OpenAPI schema accessible', () => pm.response.to.have.status(200));",
+                  "pm.test('Title is correct', () => {",
+                  "    pm.expect(pm.response.json().info.title).to.include('PulseCity');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
