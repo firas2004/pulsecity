@@ -36,6 +36,39 @@ const CHART_COLORS = {
   foot_traffic:  '#FB923C',
 };
 
+// Canonical display order — defines which cards appear and in what order
+const METRIC_ORDER = [
+  // Row 1 — Core urban flows
+  'traffic', 'foot_traffic', 'pedestrian', 'parking',
+  // Row 2 — Environment
+  'air_co2', 'noise', 'temperature', 'humidity',
+  // Row 3 — Infrastructure
+  'energy', 'wind_speed', 'waste_fill', 'water_quality',
+];
+
+// Pretty French labels for chart selector buttons
+const METRIC_LABELS = {
+  traffic:       '🚗 Trafic',
+  foot_traffic:  '🚶 Piétons Gare',
+  pedestrian:    '🚶 Flux Piétonnier',
+  parking:       '🅿️ Parking',
+  air_co2:       '🌫️ CO₂',
+  noise:         '🔊 Bruit',
+  temperature:   '🌡️ Température',
+  humidity:      '💧 Humidité',
+  energy:        '⚡ Énergie',
+  wind_speed:    '🌬️ Vent',
+  waste_fill:    '🗑️ Déchets',
+  water_quality: '💧 Qualité Eau',
+};
+
+// Metric groups for section headers in the card grid
+const METRIC_GROUPS = [
+  { label: 'Mobilité Urbaine',  keys: ['traffic', 'foot_traffic', 'pedestrian', 'parking'] },
+  { label: 'Environnement',     keys: ['air_co2', 'noise', 'temperature', 'humidity'] },
+  { label: 'Infrastructure',    keys: ['energy', 'wind_speed', 'waste_fill', 'water_quality'] },
+];
+
 // Skeleton placeholder card
 const SkeletonCard = () => (
   <div className="card" style={{ height: '120px' }}>
@@ -306,29 +339,52 @@ const ClientDashboard = () => {
         </div>
       </div>
 
-      {/* Grille de Métriques */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
-        {loading ? (
-          Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
-        ) : (
-          Object.entries(metrics).map(([type, data]) => (
-            <div key={type} style={{ cursor: 'pointer' }} onClick={() => setSelectedMetric(type)}>
-              <MetricCard
-                type={type}
-                value={data?.value}
-                unit={data?.unit}
-                status={data?.anomaly ? 'Critical' : data?.status || 'Normal'}
-              />
+      {/* Grille de Métriques — grouped by category */}
+      {loading ? (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
+          {Array.from({ length: 12 }).map((_, i) => <SkeletonCard key={i} />)}
+        </div>
+      ) : (
+        METRIC_GROUPS.map(group => {
+          const groupMetrics = group.keys.filter(k => metrics[k]);
+          if (groupMetrics.length === 0) return null;
+          return (
+            <div key={group.label}>
+              <div style={{
+                fontSize: '11px', fontWeight: '700', letterSpacing: '0.14em',
+                textTransform: 'uppercase', color: 'var(--text-muted)',
+                marginBottom: '10px', paddingLeft: '2px',
+                display: 'flex', alignItems: 'center', gap: '8px'
+              }}>
+                <span style={{ width: '24px', height: '1px', background: 'var(--border-color)', display: 'inline-block' }} />
+                {group.label}
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px', marginBottom: '20px' }}>
+                {group.keys.map(type => {
+                  const data = metrics[type];
+                  if (!data) return null;
+                  return (
+                    <div key={type} style={{ cursor: 'pointer' }} onClick={() => setSelectedMetric(type)}>
+                      <MetricCard
+                        type={type}
+                        value={data?.value}
+                        unit={data?.unit}
+                        status={data?.anomaly ? 'Critical' : data?.status || 'Normal'}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          ))
-        )}
-        {!loading && Object.keys(metrics).length === 0 && (
-          <div style={{ gridColumn: '1 / -1', textAlign: 'center', color: 'var(--text-muted)', padding: '40px' }}>
-            <RefreshCw size={24} style={{ marginBottom: '12px', opacity: 0.5 }} />
-            <p>En attente des données live du cluster...</p>
-          </div>
-        )}
-      </div>
+          );
+        })
+      )}
+      {!loading && Object.keys(metrics).length === 0 && (
+        <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '40px' }}>
+          <RefreshCw size={24} style={{ marginBottom: '12px', opacity: 0.5 }} />
+          <p>En attente des données live du cluster...</p>
+        </div>
+      )}
 
       {/* Rangée Carte + Graphique + Alertes */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 380px', gap: '20px', minHeight: '380px' }}>
@@ -347,16 +403,16 @@ const ClientDashboard = () => {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <h3 style={{ fontSize: '15px', fontWeight: '600', color: 'var(--text-main)' }}>Évolution Temps Réel</h3>
             <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-              {Object.keys(metrics).map(key => (
+              {METRIC_ORDER.filter(k => metrics[k]).map(key => (
                 <button key={key} onClick={() => setSelectedMetric(key)}
                   style={{
                     padding: '4px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: '600',
-                    border: 'none', cursor: 'pointer', textTransform: 'uppercase',
+                    border: 'none', cursor: 'pointer', whiteSpace: 'nowrap',
                     backgroundColor: selectedMetric === key ? CHART_COLORS[key] || '#3B82F6' : 'var(--surface-2)',
                     color: selectedMetric === key ? '#FFF' : 'var(--text-main)',
                     transition: 'all 0.2s'
                   }}>
-                  {key}
+                  {METRIC_LABELS[key] || key}
                 </button>
               ))}
             </div>
