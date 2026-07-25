@@ -12,10 +12,12 @@ from agents.threshold_agent import threshold_agent
 from agents.traffic_agent import traffic_agent
 
 TOPICS = [
-    # Original
+    # Original 4
     "traffic-data", "air-quality", "noise-level", "energy-data",
-    # New metrics
+    # Session-2: env/urban sensors
     "temperature-data", "humidity-data", "wind-data", "pedestrian-data", "waste-data",
+    # Session-3: city-service sensors
+    "water-quality", "parking-data", "foot-traffic",
     # Alerts
     "alerts",
 ]

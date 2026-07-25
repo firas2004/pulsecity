@@ -115,6 +115,36 @@ data:
           "targets": [
             {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "container_memory_working_set_bytes{namespace=~\"default|kafka\", container!=\"\", container!=\"POD\"}", "legendFormat": "{{pod}} / {{container}}", "refId": "A"}
           ]
+        },
+        {
+          "id": 11, "type": "timeseries", "title": "\ud83d\udca7 Anomalies Qualit\u00e9 d'Eau (pH) par Zone",
+          "gridPos": {"h": 8, "w": 8, "x": 0, "y": 28},
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"lineWidth": 2, "fillOpacity": 15, "spanNulls": false}, "unit": "ops"}, "overrides": []},
+          "options": {"tooltip": {"mode": "multi"}, "legend": {"displayMode": "list", "placement": "bottom"}},
+          "targets": [
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum by(zone) (rate(pulsecity_anomalies_total{sensor_type=\"water_quality\"}[2m]))", "legendFormat": "{{zone}}", "refId": "A"}
+          ]
+        },
+        {
+          "id": 12, "type": "timeseries", "title": "\ud83c\udd7f Anomalies Parking (Saturation) par Zone",
+          "gridPos": {"h": 8, "w": 8, "x": 8, "y": 28},
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"lineWidth": 2, "fillOpacity": 15, "spanNulls": false}, "unit": "ops"}, "overrides": []},
+          "options": {"tooltip": {"mode": "multi"}, "legend": {"displayMode": "list", "placement": "bottom"}},
+          "targets": [
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum by(zone) (rate(pulsecity_anomalies_total{sensor_type=\"parking\"}[2m]))", "legendFormat": "{{zone}}", "refId": "A"}
+          ]
+        },
+        {
+          "id": 13, "type": "timeseries", "title": "\ud83d\udeb6 Anomalies Flux Pi\u00e9tonnier (Gare) par Zone",
+          "gridPos": {"h": 8, "w": 8, "x": 16, "y": 28},
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"lineWidth": 2, "fillOpacity": 15, "spanNulls": false}, "unit": "ops"}, "overrides": []},
+          "options": {"tooltip": {"mode": "multi"}, "legend": {"displayMode": "list", "placement": "bottom"}},
+          "targets": [
+            {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum by(zone) (rate(pulsecity_anomalies_total{sensor_type=\"foot_traffic\"}[2m]))", "legendFormat": "{{zone}}", "refId": "A"}
+          ]
         }
       ]
     }

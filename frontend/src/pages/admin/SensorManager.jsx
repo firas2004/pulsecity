@@ -5,15 +5,19 @@ import api from '../../services/api';
 
 // Known sensor types with presets
 const SENSOR_PRESETS = [
-  { type: 'traffic',     label: 'Trafic Routier',      icon: <Car size={18}/>,         unit: 'vehicles/min', min_normal: 10,   max_normal: 120,  min_anomaly: 200,  max_anomaly: 400,  color: '#F59E0B' },
-  { type: 'air_co2',    label: 'Qualité Air (CO₂)',    icon: <Wind size={18}/>,         unit: 'ppm',          min_normal: 350,  max_normal: 800,  min_anomaly: 1200, max_anomaly: 2000, color: '#10B981' },
-  { type: 'noise',      label: 'Niveau Sonore',        icon: <Volume2 size={18}/>,      unit: 'dB',           min_normal: 35,   max_normal: 75,   min_anomaly: 100,  max_anomaly: 130,  color: '#8B5CF6' },
-  { type: 'energy',     label: 'Consommation Énergie', icon: <Zap size={18}/>,          unit: 'kWh',          min_normal: 50,   max_normal: 500,  min_anomaly: 900,  max_anomaly: 1500, color: '#3B82F6' },
-  { type: 'temperature',label: 'Température',          icon: <Thermometer size={18}/>, unit: '°C',            min_normal: 10,   max_normal: 40,   min_anomaly: 50,   max_anomaly: 70,   color: '#EF4444' },
-  { type: 'humidity',   label: 'Humidité',             icon: <Droplets size={18}/>,     unit: '%',            min_normal: 20,   max_normal: 80,   min_anomaly: 90,   max_anomaly: 100,  color: '#06B6D4' },
-  { type: 'pressure',   label: 'Pression Atm.',        icon: <Gauge size={18}/>,        unit: 'hPa',          min_normal: 990,  max_normal: 1020, min_anomaly: 940,  max_anomaly: 980,  color: '#64748B' },
-  { type: 'wind',       label: 'Vent',                 icon: <Activity size={18}/>,     unit: 'km/h',         min_normal: 0,    max_normal: 40,   min_anomaly: 80,   max_anomaly: 150,  color: '#A3E635' },
-  { type: 'custom',     label: 'Capteur Personnalisé', icon: <Cpu size={18}/>,          unit: 'unit',         min_normal: 0,    max_normal: 100,  min_anomaly: 150,  max_anomaly: 300,  color: '#F472B6' },
+  { type: 'traffic',       label: 'Trafic Routier',        icon: <Car size={18}/>,          unit: 'vehicles/min', min_normal: 10,   max_normal: 120,  min_anomaly: 200,  max_anomaly: 400,  color: '#F59E0B' },
+  { type: 'air_co2',      label: 'Qualité Air (CO₂)',     icon: <Wind size={18}/>,         unit: 'ppm',          min_normal: 350,  max_normal: 800,  min_anomaly: 1200, max_anomaly: 2000, color: '#10B981' },
+  { type: 'noise',        label: 'Niveau Sonore',          icon: <Volume2 size={18}/>,      unit: 'dB',           min_normal: 35,   max_normal: 75,   min_anomaly: 100,  max_anomaly: 130,  color: '#8B5CF6' },
+  { type: 'energy',       label: 'Consommation Énergie',   icon: <Zap size={18}/>,          unit: 'kWh',          min_normal: 50,   max_normal: 500,  min_anomaly: 900,  max_anomaly: 1500, color: '#3B82F6' },
+  { type: 'temperature',  label: 'Température',            icon: <Thermometer size={18}/>,  unit: '°C',            min_normal: 10,   max_normal: 40,   min_anomaly: 50,   max_anomaly: 70,   color: '#EF4444' },
+  { type: 'humidity',     label: 'Humidité',               icon: <Droplets size={18}/>,     unit: '%',            min_normal: 20,   max_normal: 80,   min_anomaly: 90,   max_anomaly: 100,  color: '#06B6D4' },
+  { type: 'pressure',     label: 'Pression Atm.',          icon: <Gauge size={18}/>,        unit: 'hPa',          min_normal: 990,  max_normal: 1020, min_anomaly: 940,  max_anomaly: 980,  color: '#64748B' },
+  { type: 'wind',         label: 'Vent',                   icon: <Activity size={18}/>,     unit: 'km/h',         min_normal: 0,    max_normal: 40,   min_anomaly: 80,   max_anomaly: 150,  color: '#A3E635' },
+  // Session-3: city-service sensors
+  { type: 'water_quality',label: 'Qualité de l\'Eau (pH)',  icon: <Droplets size={18}/>,     unit: 'pH',           min_normal: 6.5,  max_normal: 8.5,  min_anomaly: 9.5,  max_anomaly: 11.0, color: '#0EA5E9' },
+  { type: 'parking',      label: 'Places Libres Parking',  icon: <Activity size={18}/>,     unit: '%',            min_normal: 20,   max_normal: 95,   min_anomaly: 0,    max_anomaly: 5,    color: '#7C3AED' },
+  { type: 'foot_traffic', label: 'Flux Piétons (Gare)',    icon: <Activity size={18}/>,     unit: 'people/min',   min_normal: 10,   max_normal: 250,  min_anomaly: 450,  max_anomaly: 700,  color: '#FB923C' },
+  { type: 'custom',       label: 'Capteur Personnalisé',  icon: <Cpu size={18}/>,          unit: 'unit',         min_normal: 0,    max_normal: 100,  min_anomaly: 150,  max_anomaly: 300,  color: '#F472B6' },
 ];
 
 const EMPTY_FORM = {
@@ -27,20 +31,27 @@ const EMPTY_FORM = {
 };
 
 const TYPE_ICON_MAP = {
-  traffic: <Car size={16}/>,
-  air_co2: <Wind size={16}/>,
-  noise: <Volume2 size={16}/>,
-  energy: <Zap size={16}/>,
-  temperature: <Thermometer size={16}/>,
-  humidity: <Droplets size={16}/>,
-  pressure: <Gauge size={16}/>,
-  wind: <Activity size={16}/>,
+  traffic:       <Car size={16}/>,
+  air_co2:       <Wind size={16}/>,
+  noise:         <Volume2 size={16}/>,
+  energy:        <Zap size={16}/>,
+  temperature:   <Thermometer size={16}/>,
+  humidity:      <Droplets size={16}/>,
+  pressure:      <Gauge size={16}/>,
+  wind:          <Activity size={16}/>,
+  // Session-3: city-service
+  water_quality: <Droplets size={16}/>,
+  parking:       <Activity size={16}/>,
+  foot_traffic:  <Activity size={16}/>,
 };
 
 const TYPE_COLOR_MAP = {
   traffic: '#F59E0B', air_co2: '#10B981', noise: '#8B5CF6', energy: '#3B82F6',
   temperature: '#EF4444', humidity: '#06B6D4', pressure: '#64748B',
-  wind: '#A3E635', default: '#6366F1',
+  wind: '#A3E635',
+  // Session-3: city-service
+  water_quality: '#0EA5E9', parking: '#7C3AED', foot_traffic: '#FB923C',
+  default: '#6366F1',
 };
 
 export default function SensorManager() {

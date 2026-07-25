@@ -3,30 +3,38 @@ import * as Icons from 'lucide-react';
 
 const iconMap = {
   // Original 4
-  traffic:     Icons.Car,
-  air_co2:     Icons.Wind,
-  noise:       Icons.Volume2,
-  energy:      Icons.Zap,
-  // New 5
-  temperature: Icons.Thermometer,
-  humidity:    Icons.Droplets,
-  wind_speed:  Icons.Gauge,
-  pedestrian:  Icons.Users,
-  waste_fill:  Icons.Trash2,
+  traffic:       Icons.Car,
+  air_co2:       Icons.Wind,
+  noise:         Icons.Volume2,
+  energy:        Icons.Zap,
+  // Session-2: env/urban
+  temperature:   Icons.Thermometer,
+  humidity:      Icons.Droplets,
+  wind_speed:    Icons.Gauge,
+  pedestrian:    Icons.Users,
+  waste_fill:    Icons.Trash2,
+  // Session-3: city-service
+  water_quality: Icons.Droplets,
+  parking:       Icons.ParkingSquare,
+  foot_traffic:  Icons.PersonStanding,
 };
 
 const labelMap = {
   // Original 4
-  traffic:     'Trafic Routier',
-  air_co2:     'Qualité de l\'Air',
-  noise:       'Niveau Sonore',
-  energy:      'Consommation Énergie',
-  // New 5
-  temperature: 'Température',
-  humidity:    'Humidité',
-  wind_speed:  'Vitesse du Vent',
-  pedestrian:  'Flux Piétonnier',
-  waste_fill:  'Remplissage Poubelles',
+  traffic:       'Trafic Routier',
+  air_co2:       'Qualité de l\'Air',
+  noise:         'Niveau Sonore',
+  energy:        'Consommation Énergie',
+  // Session-2: env/urban
+  temperature:   'Température',
+  humidity:      'Humidité',
+  wind_speed:    'Vitesse du Vent',
+  pedestrian:    'Flux Piétonnier',
+  waste_fill:    'Remplissage Poubelles',
+  // Session-3: city-service
+  water_quality: 'Qualité de l\'Eau',
+  parking:       'Places Libres Parking',
+  foot_traffic:  'Flux Piétons (Gare)',
 };
 
 const MetricCard = ({ type, value, unit, status }) => {

@@ -175,19 +175,23 @@ def seed_database():
             {"id": "siliana",      "name": "Siliana",       "lat": 36.0844, "lon": 9.3706,  "pop": 25000,   "desc": "Région intérieure, agriculture de montagne"},
         ]
 
-        # Default sensor specs — 9 types total
+        # Default sensor specs — 12 types total
         default_sensors = [
-            # ── Original 4 ──────────────────────────────────────────────────────
-            {"type": "traffic",     "unit": "vehicles/min", "min_n": 10,  "max_n": 120, "min_a": 200,  "max_a": 400,  "threshold": 120},
-            {"type": "air_co2",     "unit": "ppm",          "min_n": 350, "max_n": 800, "min_a": 1200, "max_a": 2000, "threshold": 800},
-            {"type": "noise",       "unit": "dB",           "min_n": 35,  "max_n": 75,  "min_a": 100,  "max_a": 130,  "threshold": 75},
-            {"type": "energy",      "unit": "kWh",          "min_n": 50,  "max_n": 500, "min_a": 900,  "max_a": 1500, "threshold": 500},
-            # ── New 5 ───────────────────────────────────────────────────────────
-            {"type": "temperature", "unit": "°C",           "min_n": 12,  "max_n": 38,  "min_a": 45,   "max_a": 55,   "threshold": 45},
-            {"type": "humidity",    "unit": "%",            "min_n": 30,  "max_n": 75,  "min_a": 90,   "max_a": 100,  "threshold": 90},
-            {"type": "wind_speed",  "unit": "km/h",         "min_n": 5,   "max_n": 40,  "min_a": 80,   "max_a": 130,  "threshold": 80},
-            {"type": "pedestrian",  "unit": "people/min",   "min_n": 5,   "max_n": 200, "min_a": 400,  "max_a": 700,  "threshold": 300},
-            {"type": "waste_fill",  "unit": "%",            "min_n": 0,   "max_n": 70,  "min_a": 85,   "max_a": 100,  "threshold": 85},
+            # ── Original 4 ────────────────────────────────────────────────────────────
+            {"type": "traffic",       "unit": "vehicles/min", "min_n": 10,   "max_n": 120,  "min_a": 200,   "max_a": 400,   "threshold": 120},
+            {"type": "air_co2",       "unit": "ppm",          "min_n": 350,  "max_n": 800,  "min_a": 1200,  "max_a": 2000,  "threshold": 800},
+            {"type": "noise",         "unit": "dB",           "min_n": 35,   "max_n": 75,   "min_a": 100,   "max_a": 130,   "threshold": 75},
+            {"type": "energy",        "unit": "kWh",          "min_n": 50,   "max_n": 500,  "min_a": 900,   "max_a": 1500,  "threshold": 500},
+            # ── Session-2: env/urban sensors ──────────────────────────────────────────
+            {"type": "temperature",   "unit": "°C",           "min_n": 12,   "max_n": 38,   "min_a": 45,    "max_a": 55,    "threshold": 45},
+            {"type": "humidity",      "unit": "%",            "min_n": 30,   "max_n": 75,   "min_a": 90,    "max_a": 100,   "threshold": 90},
+            {"type": "wind_speed",    "unit": "km/h",         "min_n": 5,    "max_n": 40,   "min_a": 80,    "max_a": 130,   "threshold": 80},
+            {"type": "pedestrian",    "unit": "people/min",   "min_n": 5,    "max_n": 200,  "min_a": 400,   "max_a": 700,   "threshold": 300},
+            {"type": "waste_fill",    "unit": "%",            "min_n": 0,    "max_n": 70,   "min_a": 85,    "max_a": 100,   "threshold": 85},
+            # ── Session-3: city-service sensors ────────────────────────────────────────
+            {"type": "water_quality",  "unit": "pH",           "min_n": 6.5,  "max_n": 8.5,  "min_a": 9.5,   "max_a": 11.0,  "threshold": 9.0},
+            {"type": "parking",        "unit": "%",            "min_n": 20,   "max_n": 95,   "min_a": 0,     "max_a": 5,     "threshold": 10},
+            {"type": "foot_traffic",   "unit": "people/min",   "min_n": 10,   "max_n": 250,  "min_a": 450,   "max_a": 700,   "threshold": 400},
         ]
 
         for item in default_cities:

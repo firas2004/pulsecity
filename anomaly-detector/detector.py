@@ -37,7 +37,14 @@ MIN_SAMPLES        = int(os.getenv("MIN_SAMPLES", "15"))
 ANOMALY_THRESHOLD  = float(os.getenv("ANOMALY_THRESHOLD", "-0.05"))
 API_PORT           = int(os.getenv("API_PORT", "8000"))
 
-TOPICS_TO_CONSUME  = ["traffic-data", "air-quality", "noise-level", "energy-data"]
+TOPICS_TO_CONSUME  = [
+    # Original 4
+    "traffic-data", "air-quality", "noise-level", "energy-data",
+    # Session-2: env/urban sensors
+    "temperature-data", "humidity-data", "wind-data", "pedestrian-data", "waste-data",
+    # Session-3: city-service sensors
+    "water-quality", "parking-data", "foot-traffic",
+]
 ALERTS_TOPIC       = "alerts"
 
 # ── Métriques Prometheus ─────────────────────────────────────────────────────

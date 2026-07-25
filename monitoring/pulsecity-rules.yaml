@@ -47,6 +47,40 @@ spec:
             summary: "Anomaly Detector ne consomme plus de messages"
             description: "Aucune métrique pulsecity_messages_consumed_total depuis 2 minutes"
 
+        # ── Session-3: city-service sensor alerts ────────────────────────────────
+        - alert: EauQualiteAnomalie
+          expr: |
+            sum(rate(pulsecity_anomalies_total{sensor_type="water_quality"}[2m])) > 0.02
+          for: 1m
+          labels:
+            severity: critical
+            project: pulsecity
+          annotations:
+            summary: "Anomalie de qualité d'eau détectée"
+            description: "pH anormal détecté par l'IA sur capteur eau (taux: {{ $value | printf \"%.4f\" }}/s)"
+
+        - alert: ParkingComplet
+          expr: |
+            sum(rate(pulsecity_anomalies_total{sensor_type="parking"}[2m])) > 0.05
+          for: 2m
+          labels:
+            severity: warning
+            project: pulsecity
+          annotations:
+            summary: "Parking saturé détecté"
+            description: "Taux d'anomalies parking élevé (< 5% places libres) dans une ou plusieurs zones"
+
+        - alert: FluxPietonsEleve
+          expr: |
+            sum(rate(pulsecity_anomalies_total{sensor_type="foot_traffic"}[2m])) > 0.05
+          for: 1m
+          labels:
+            severity: warning
+            project: pulsecity
+          annotations:
+            summary: "Flux piétonnier excessif en gare"
+            description: "Dépassement du seuil de 400 personnes/min détecté (score IA, taux: {{ $value | printf \"%.4f\" }}/s)"
+
     # ── Alertes Infrastructure ───────────────────────────────────────────────
     - name: pulsecity.infra
       interval: 30s
