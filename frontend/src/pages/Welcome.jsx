@@ -246,7 +246,7 @@ export default function Welcome() {
       {/* ── CITIES GALLERY ── */}
       <CitiesGallery
         images={[
-          '/assests/Ariana.jpg','/assests/Beja.jpg','/assests/Ben Arous.jpg','/assests/Monastir.jpg','/assests/Sfax.jpg','/assests/sousse.png','/assests/Tunis.png'
+          '/assests/Ariana.jpg','/assests/Beja.jpg','/assests/BenArous.jpg','/assests/Monastir.jpg','/assests/Sfax.jpg','/assests/sousse.png','/assests/Tunis.png'
         ]}
         titles={['Ariana','Beja','Ben Arous','Monastir','Sfax','Sousse','Tunis']}
       />

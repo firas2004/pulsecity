@@ -30,6 +30,16 @@ grafana:
   adminPassword: "pulsecity123"   # mot de passe admin Grafana
   persistence:
     enabled: false
+  grafana.ini:
+    server:
+      serve_from_sub_path: false
+      root_url: "%(protocol)s://%(domain)s:%(port)s/grafana/"
+    security:
+      allow_embedding: true
+    auth.anonymous:
+      enabled: true
+      org_name: "Main Org."
+      org_role: Viewer
   # Charger automatiquement les dashboards depuis les ConfigMaps labelisés
   sidecar:
     dashboards:

@@ -89,6 +89,10 @@ const AdminDashboard = () => {
     return getCityStatus(city) === statusFilter;
   });
 
+  const grafanaBaseUrl = import.meta.env.VITE_GRAFANA_URL || '/grafana';
+  const grafanaDashboardUrl = `${grafanaBaseUrl.replace(/\/$/, '')}/d/pulsecity-iot-v1/pulsecity-iot-v1`;
+  const grafanaEmbedUrl = `${grafanaDashboardUrl}?orgId=1&refresh=10s`;
+
   const openCreate = () => {
     setEditingCity(null);
     setForm(EMPTY_CITY);
@@ -228,6 +232,36 @@ const AdminDashboard = () => {
             </button>
           ))}
         </div>
+      </div>
+
+      <div className="panel-card grafana-card" style={{ padding: '20px', gap: '18px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '14px', flexWrap: 'wrap' }}>
+          <div>
+            <div className="section-title">Monitoring Grafana</div>
+            <h3 style={{ margin: 0, fontSize: '18px', color: 'var(--text-main)' }}>Dashboard PulseCity en direct</h3>
+            <p style={{ margin: '8px 0 0', color: 'var(--text-soft)', fontSize: '13px', maxWidth: '720px' }}>
+              Intégrez le dashboard Grafana PulseCity pour suivre l’activité des capteurs, les anomalies et les ressources du cluster depuis le panneau d’administration.
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <a href={grafanaDashboardUrl} target="_blank" rel="noreferrer noopener" className="btn btn-secondary" style={{ marginTop: '4px' }}>
+              Ouvrir Grafana
+            </a>
+            <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Source : {grafanaBaseUrl}</span>
+          </div>
+        </div>
+
+        <div className="grafana-iframe-wrapper">
+          <iframe
+            src={grafanaEmbedUrl}
+            title="PulseCity Grafana dashboard"
+            className="grafana-iframe"
+          />
+        </div>
+
+        <p style={{ margin: '0', color: 'var(--text-muted)', fontSize: '13px' }}>
+          Le tableau de bord est rendu directement depuis l’application. Si l’iframe reste vide, vérifiez que le namespace monitoring contient bien le service Grafana et que le stack monitoring est en cours d’exécution.
+        </p>
       </div>
 
       {/* En-tête */}

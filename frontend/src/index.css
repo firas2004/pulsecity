@@ -209,6 +209,29 @@ h1, h2, h3, h4, h5, h6 {
   border-color: rgba(59, 130, 246, 0.2);
 }
 
+.grafana-card {
+  display: grid;
+  background: linear-gradient(135deg, var(--surface), var(--surface-2));
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+}
+
+.grafana-iframe-wrapper {
+  background: var(--surface-2);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  overflow: hidden;
+  min-height: 420px;
+}
+
+.grafana-iframe {
+  width: 100%;
+  min-height: 520px;
+  border: none;
+  border-radius: 18px;
+}
+
 /* Buttons */
 .btn {
   display: inline-flex;

@@ -135,243 +135,256 @@ const ChatBot = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 80px)', padding: '24px 32px', gap: '16px' }}>
-      <div className="dashboard-hero" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-        <div>
-          <div className="section-title">Assistant IA</div>
-          <h2 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--text-main)', marginBottom: '6px' }}>Conversation intelligente avec PulseCity</h2>
-          <p style={{ fontSize: '13px', color: 'var(--text-muted)', maxWidth: '620px' }}>Posez des questions sur les villes, les capteurs, les alertes et les anomalies détectées.</p>
-        </div>
-        <div className="stat-chip"><Sparkles size={14} style={{ color: 'var(--accent)' }} /> Histoire conservée par ville</div>
-      </div>
-      {/* En-tête ChatBot */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{
-            width: '44px', height: '44px', borderRadius: '12px',
-            background: 'linear-gradient(135deg, var(--primary), var(--accent))',
-            display: 'flex', alignItems: 'center', justifyContent: 'center'
-          }}>
-            <Sparkles size={20} style={{ color: '#FFF' }} />
-          </div>
-          <div>
-            <h1 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-main)' }}>PulseCity Brain AI</h1>
-            <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Propulsé par Groq • Accès temps réel aux capteurs</p>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-          {/* Bouton Configuration Clé API */}
-          <button 
-            onClick={() => setShowKeySettings(!showKeySettings)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '8px',
-              padding: '8px 14px', borderRadius: '8px', fontSize: '13px',
-              backgroundColor: groqKey ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
-              border: `1px solid ${groqKey ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'}`,
-              color: groqKey ? 'var(--success)' : 'var(--danger)',
-              cursor: 'pointer', fontWeight: '500', transition: 'all 0.2s'
-            }}
-          >
-            <Key size={14} />
-            <span>{groqKey ? 'Clé API configurée' : 'Configurer Clé API'}</span>
-            <Settings size={14} />
-          </button>
-
-          {/* Sélecteur de ville */}
-          <select value={selectedCity} onChange={e => setSelectedCity(e.target.value)}
-            style={{ padding: '8px 12px', backgroundColor: 'var(--surface)', border: '1px solid var(--border-color)', borderRadius: '8px', color: 'var(--text-main)', fontSize: '13px', outline: 'none' }}>
-            {DEFAULT_CITIES.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
-
-          <button className="btn btn-secondary" onClick={clearChat} title="Nouvelle conversation">
-            <RefreshCw size={14} />
-          </button>
-        </div>
-      </div>
-
-      {/* Panneau de configuration Clé API Groq */}
-      {showKeySettings && (
-        <div style={{
-          backgroundColor: 'var(--surface)', border: '1px solid var(--border-color)',
-          borderRadius: '12px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px',
-          boxShadow: 'var(--shadow)', animation: 'slideDown 0.2s ease-out'
+    <div style={{ height: 'calc(100vh - 80px)', padding: '24px 32px', display: 'flex', justifyContent: 'center' }}>
+      <div style={{ width: '100%', maxWidth: '1360px', display: 'grid', gridTemplateColumns: '320px minmax(0, 1fr)', gap: '18px', minHeight: 0 }}>
+        <aside style={{
+          background: 'linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%)',
+          border: '1px solid var(--border-color)', borderRadius: '24px',
+          padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px',
+          boxShadow: 'var(--shadow)', minHeight: 0
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Key size={16} style={{ color: 'var(--primary)' }} />
-              Clé API Groq Personnelle
-            </h3>
-            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-              Stockée localement dans votre navigateur
-            </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{
+              width: '44px', height: '44px', borderRadius: '14px',
+              background: 'linear-gradient(135deg, var(--primary), var(--accent))',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 30px rgba(59, 130, 246, 0.25)'
+            }}>
+              <Sparkles size={20} style={{ color: '#FFF' }} />
+            </div>
+            <div>
+              <h2 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>PulseCity Brain AI</h2>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '4px 0 0' }}>Analyse temps réel des villes</p>
+            </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <div style={{ position: 'relative', flex: 1 }}>
-              <input
-                type={showKeyPassword ? 'text' : 'password'}
-                placeholder="Entrez votre clé API Groq (ex: gsk_...)"
-                value={groqKey}
-                onChange={(e) => setGroqKey(e.target.value)}
+          <div style={{
+            borderRadius: '16px', padding: '14px', background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(139, 92, 246, 0.12))',
+            border: '1px solid rgba(59, 130, 246, 0.16)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: '700', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.14em' }}>
+              <Bot size={13} /> Assistant prêt
+            </div>
+            <p style={{ fontSize: '13px', color: 'var(--text-main)', lineHeight: 1.6, margin: '8px 0 0' }}>
+              Posez des questions sur la circulation, la qualité de l’air, les anomalies et les alertes en cours.
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)', letterSpacing: '0.16em', textTransform: 'uppercase' }}>Suggestions</div>
+            {SUGGESTED_QUESTIONS.map((q, idx) => (
+              <button key={idx} onClick={() => sendMessage(q.label)} disabled={loading}
                 style={{
-                  width: '100%', padding: '10px 40px 10px 12px', borderRadius: '8px',
-                  backgroundColor: 'var(--surface-2)', border: '1px solid var(--border-color)',
-                  color: 'var(--text-main)', fontSize: '13px', outline: 'none'
+                  padding: '10px 12px', borderRadius: '12px', fontSize: '13px',
+                  backgroundColor: 'var(--surface)', border: '1px solid var(--border-color)',
+                  color: 'var(--text-main)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px',
+                  textAlign: 'left', transition: 'all 0.2s', fontWeight: '500'
                 }}
-              />
-              <button
-                type="button"
-                onClick={() => setShowKeyPassword(!showKeyPassword)}
-                style={{
-                  position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
-                  background: 'none', border: 'none', color: '#9CA3AF', cursor: 'pointer'
-                }}
+                onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--surface-2)'; e.currentTarget.style.borderColor = 'var(--primary)'; }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'var(--surface)'; e.currentTarget.style.borderColor = 'var(--border-color)'; }}
               >
-                {showKeyPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                <span>{q.icon}</span> {q.label}
+              </button>
+            ))}
+          </div>
+
+          <div style={{ marginTop: 'auto', paddingTop: '8px', borderTop: '1px solid var(--border-color)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+              <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Ville active</span>
+              <select value={selectedCity} onChange={e => setSelectedCity(e.target.value)}
+                style={{ padding: '7px 10px', backgroundColor: 'var(--surface)', border: '1px solid var(--border-color)', borderRadius: '8px', color: 'var(--text-main)', fontSize: '12px', outline: 'none' }}>
+                {DEFAULT_CITIES.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
+            <button onClick={() => setShowKeySettings(!showKeySettings)}
+              style={{
+                width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                padding: '9px 12px', borderRadius: '10px', fontSize: '13px',
+                backgroundColor: groqKey ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
+                border: `1px solid ${groqKey ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'}`,
+                color: groqKey ? 'var(--success)' : 'var(--danger)', cursor: 'pointer', fontWeight: '600'
+              }}>
+              <Key size={14} /> {groqKey ? 'Clé API configurée' : 'Configurer la clé API'}
+            </button>
+          </div>
+        </aside>
+
+        <section style={{
+          display: 'flex', flexDirection: 'column', minHeight: 0,
+          background: 'var(--surface)', border: '1px solid var(--border-color)', borderRadius: '24px',
+          overflow: 'hidden', boxShadow: 'var(--shadow)'
+        }}>
+          <header style={{
+            padding: '18px 22px', borderBottom: '1px solid var(--border-color)',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px',
+            background: 'linear-gradient(90deg, var(--surface) 0%, var(--surface-2) 100%)'
+          }}>
+            <div>
+              <div style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--primary)' }}>Conversation IA</div>
+              <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-main)', margin: '2px 0 0' }}>Assistant de surveillance urbain</h3>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <div className="stat-chip"><Sparkles size={13} style={{ color: 'var(--accent)' }} /> Historique par ville</div>
+              <button className="btn btn-secondary" onClick={clearChat} title="Nouvelle conversation" style={{ borderRadius: '10px' }}>
+                <RefreshCw size={14} />
               </button>
             </div>
+          </header>
 
-            <button
-              onClick={() => saveApiKey(groqKey)}
-              style={{
-                padding: '0 20px', borderRadius: '8px', fontSize: '13px', fontWeight: '600',
-                backgroundColor: saveSuccess ? 'var(--success)' : 'var(--primary)', color: '#FFF',
-                border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
-                transition: 'background-color 0.2s'
-              }}
-            >
-              {saveSuccess ? <Check size={16} /> : null}
-              {saveSuccess ? 'Enregistré' : 'Sauvegarder'}
-            </button>
+          {showKeySettings && (
+            <div style={{
+              backgroundColor: 'var(--surface-2)', borderBottom: '1px solid var(--border-color)',
+              padding: '16px 22px', display: 'flex', flexDirection: 'column', gap: '12px'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h4 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                  <Key size={16} style={{ color: 'var(--primary)' }} /> Clé API Groq personnelle
+                </h4>
+                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Stockée localement dans votre navigateur</span>
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <div style={{ position: 'relative', flex: 1, minWidth: '240px' }}>
+                  <input
+                    type={showKeyPassword ? 'text' : 'password'}
+                    placeholder="Entrez votre clé API Groq (ex: gsk_...)"
+                    value={groqKey}
+                    onChange={(e) => setGroqKey(e.target.value)}
+                    style={{
+                      width: '100%', padding: '10px 40px 10px 12px', borderRadius: '10px',
+                      backgroundColor: 'var(--surface)', border: '1px solid var(--border-color)',
+                      color: 'var(--text-main)', fontSize: '13px', outline: 'none'
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowKeyPassword(!showKeyPassword)}
+                    style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                  >
+                    {showKeyPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+
+                <button
+                  onClick={() => saveApiKey(groqKey)}
+                  style={{
+                    padding: '0 18px', borderRadius: '10px', fontSize: '13px', fontWeight: '600',
+                    backgroundColor: saveSuccess ? 'var(--success)' : 'var(--primary)', color: '#FFF',
+                    border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px'
+                  }}
+                >
+                  {saveSuccess ? <Check size={16} /> : null}
+                  {saveSuccess ? 'Enregistré' : 'Sauvegarder'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div style={{ flex: 1, overflowY: 'auto', padding: '24px 24px 14px', background: 'linear-gradient(180deg, var(--surface-2) 0%, var(--surface) 100%)', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            {messages.map((msg, idx) => (
+              <div key={idx} style={{ display: 'flex', flexDirection: msg.role === 'user' ? 'row-reverse' : 'row', alignItems: 'flex-start', gap: '12px' }}>
+                <div style={{
+                  width: '36px', height: '36px', borderRadius: '50%', flexShrink: 0,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: msg.role === 'user'
+                    ? 'linear-gradient(135deg, #3B82F6, #6366F1)'
+                    : 'linear-gradient(135deg, #8B5CF6, #EC4899)'
+                }}>
+                  {msg.role === 'user' ? <User size={16} style={{ color: '#FFF' }} /> : <Bot size={16} style={{ color: '#FFF' }} />}
+                </div>
+
+                <div style={{
+                  maxWidth: '78%', padding: '12px 14px', borderRadius: '18px',
+                  backgroundColor: msg.role === 'user' ? 'linear-gradient(135deg, var(--primary), var(--accent))' : 'var(--surface)',
+                  border: `1px solid ${msg.isError ? 'rgba(239,68,68,0.3)' : msg.role === 'user' ? 'rgba(255,255,255,0.2)' : 'var(--border-color)'}`,
+                  boxShadow: 'var(--shadow)',
+                  color: msg.isError ? 'var(--danger)' : msg.role === 'user' ? '#FFF' : 'var(--text-main)'
+                }}>
+                  <div style={{ fontSize: '14px', lineHeight: 1.7 }} dangerouslySetInnerHTML={{ __html: formatMessageContent(msg.content) }} />
+                  <span style={{ fontSize: '10px', color: msg.role === 'user' ? 'rgba(255,255,255,0.75)' : 'var(--text-muted)', marginTop: '8px', display: 'block', textAlign: msg.role === 'user' ? 'right' : 'left' }}>
+                    {msg.timestamp.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+              </div>
+            ))}
+
+            {loading && (
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                <div style={{
+                  width: '36px', height: '36px', borderRadius: '50%', flexShrink: 0,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: 'linear-gradient(135deg, #8B5CF6, #EC4899)'
+                }}>
+                  <Bot size={16} style={{ color: '#FFF' }} />
+                </div>
+                <div style={{
+                  padding: '14px 18px', borderRadius: '18px', backgroundColor: 'var(--surface)',
+                  border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '4px'
+                }}>
+                  <span className="typing-dot" />
+                  <span className="typing-dot" />
+                  <span className="typing-dot" />
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
           </div>
 
-          <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0 }}>
-            💡 Vous pouvez obtenir une clé API gratuite sur <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer" style={{ color: '#3B82F6', textDecoration: 'underline' }}>console.groq.com</a>.
-          </p>
-        </div>
-      )}
+          <div style={{ padding: '16px 18px 18px', borderTop: '1px solid var(--border-color)', background: 'var(--surface)' }}>
+            {messages.length <= 2 && (
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
+                {SUGGESTED_QUESTIONS.map((q, idx) => (
+                  <button key={idx} onClick={() => sendMessage(q.label)} disabled={loading}
+                    style={{
+                      padding: '8px 12px', borderRadius: '999px', fontSize: '12px',
+                      backgroundColor: 'var(--surface-2)', border: '1px solid var(--border-color)',
+                      color: 'var(--primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
+                      transition: 'all 0.2s', fontWeight: '500'
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--surface)'; e.currentTarget.style.borderColor = 'var(--primary)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'var(--surface-2)'; e.currentTarget.style.borderColor = 'var(--border-color)'; }}
+                  >
+                    <span>{q.icon}</span> {q.label}
+                  </button>
+                ))}
+              </div>
+            )}
 
-      {/* Zone de messages */}
-      <div style={{
-        flex: 1, overflowY: 'auto', padding: '16px',
-        backgroundColor: 'var(--surface-2)', borderRadius: '12px',
-        border: '1px solid var(--border-color)',
-        display: 'flex', flexDirection: 'column', gap: '16px'
-      }}>
-        {messages.map((msg, idx) => (
-          <div key={idx} style={{
-            display: 'flex',
-            flexDirection: msg.role === 'user' ? 'row-reverse' : 'row',
-            alignItems: 'flex-start', gap: '10px'
-          }}>
-            {/* Avatar */}
             <div style={{
-              width: '34px', height: '34px', borderRadius: '50%', flexShrink: 0,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: msg.role === 'user'
-                ? 'linear-gradient(135deg, #3B82F6, #6366F1)'
-                : 'linear-gradient(135deg, #8B5CF6, #EC4899)'
+              display: 'flex', gap: '12px', alignItems: 'flex-end',
+              padding: '12px 14px', backgroundColor: 'var(--surface-2)',
+              border: '1px solid var(--border-color)', borderRadius: '16px', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)'
             }}>
-              {msg.role === 'user' ? <User size={16} style={{ color: '#FFF' }} /> : <Bot size={16} style={{ color: '#FFF' }} />}
-            </div>
-
-            {/* Bulle de message */}
-            <div style={{
-              maxWidth: '72%', padding: '12px 16px', borderRadius: '12px',
-              backgroundColor: msg.role === 'user' ? 'linear-gradient(135deg, var(--primary), var(--accent))' : 'var(--surface)',
-              border: `1px solid ${msg.isError ? 'rgba(239,68,68,0.3)' : msg.role === 'user' ? 'rgba(255,255,255,0.2)' : 'var(--border-color)'}`,
-              boxShadow: 'var(--shadow)'
-            }}>
-              <div
-                style={{ fontSize: '14px', color: msg.isError ? 'var(--danger)' : msg.role === 'user' ? '#FFF' : 'var(--text-main)', lineHeight: '1.6' }}
-                dangerouslySetInnerHTML={{ __html: formatMessageContent(msg.content) }}
+              <textarea
+                ref={inputRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Posez votre question sur la ville... (Entrée pour envoyer)"
+                disabled={loading}
+                rows={1}
+                style={{
+                  flex: 1, background: 'none', border: 'none', outline: 'none',
+                  color: 'var(--text-main)', fontSize: '14px', resize: 'none', lineHeight: '1.6',
+                  fontFamily: 'inherit', maxHeight: '120px', overflowY: 'auto'
+                }}
+                onInput={(e) => {
+                  e.target.style.height = 'auto';
+                  e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+                }}
               />
-              <span style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '6px', display: 'block', textAlign: msg.role === 'user' ? 'right' : 'left' }}>
-                {msg.timestamp.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-              </span>
+              <button onClick={() => sendMessage()} disabled={loading || !input.trim()}
+                style={{
+                  width: '42px', height: '42px', borderRadius: '12px',
+                  background: input.trim() && !loading ? 'linear-gradient(135deg, var(--primary), var(--accent))' : 'var(--surface)',
+                  border: 'none', cursor: input.trim() && !loading ? 'pointer' : 'not-allowed',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  transition: 'all 0.2s', flexShrink: 0
+                }}>
+                <Send size={16} style={{ color: input.trim() && !loading ? '#FFF' : '#6B7280' }} />
+              </button>
             </div>
           </div>
-        ))}
-
-        {/* Indicateur de frappe */}
-        {loading && (
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-            <div style={{
-              width: '34px', height: '34px', borderRadius: '50%', flexShrink: 0,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: 'linear-gradient(135deg, #8B5CF6, #EC4899)'
-            }}>
-              <Bot size={16} style={{ color: '#FFF' }} />
-            </div>
-            <div style={{
-              padding: '14px 18px', borderRadius: '12px',
-              backgroundColor: 'var(--surface)', border: '1px solid var(--border-color)',
-              display: 'flex', alignItems: 'center', gap: '4px'
-            }}>
-              <span className="typing-dot" />
-              <span className="typing-dot" />
-              <span className="typing-dot" />
-            </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Questions suggérées */}
-      {messages.length <= 2 && (
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          {SUGGESTED_QUESTIONS.map((q, idx) => (
-            <button key={idx} onClick={() => sendMessage(q.label)} disabled={loading}
-              style={{
-                padding: '8px 14px', borderRadius: '20px', fontSize: '13px',
-                backgroundColor: 'var(--surface)', border: '1px solid var(--border-color)',
-                color: 'var(--primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
-                transition: 'all 0.2s', fontWeight: '500'
-              }}
-              onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--surface-2)'; e.currentTarget.style.borderColor = 'var(--primary)'; }}
-              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'var(--surface)'; e.currentTarget.style.borderColor = 'var(--border-color)'; }}
-            >
-              <span>{q.icon}</span> {q.label}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Zone de saisie */}
-      <div style={{
-        display: 'flex', gap: '12px', alignItems: 'flex-end',
-        padding: '14px 16px', backgroundColor: 'var(--surface)',
-        border: '1px solid var(--border-color)', borderRadius: '12px'
-      }}>
-        <textarea
-          ref={inputRef}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Posez votre question sur la ville... (Entrée pour envoyer)"
-          disabled={loading}
-          rows={1}
-          style={{
-            flex: 1, background: 'none', border: 'none', outline: 'none',
-            color: 'var(--text-main)', fontSize: '14px', resize: 'none', lineHeight: '1.5',
-            fontFamily: 'inherit', maxHeight: '120px', overflowY: 'auto'
-          }}
-          onInput={(e) => {
-            e.target.style.height = 'auto';
-            e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
-          }}
-        />
-        <button onClick={() => sendMessage()} disabled={loading || !input.trim()}
-          style={{
-            width: '40px', height: '40px', borderRadius: '10px',
-            background: input.trim() && !loading ? 'linear-gradient(135deg, var(--primary), var(--accent))' : 'var(--surface-2)',
-            border: 'none', cursor: input.trim() && !loading ? 'pointer' : 'not-allowed',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            transition: 'all 0.2s', flexShrink: 0
-          }}>
-          <Send size={16} style={{ color: input.trim() && !loading ? '#FFF' : '#6B7280' }} />
-        </button>
+        </section>
       </div>
     </div>
   );

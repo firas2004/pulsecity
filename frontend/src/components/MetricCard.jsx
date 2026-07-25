@@ -2,21 +2,31 @@ import React, { useEffect, useState } from 'react';
 import * as Icons from 'lucide-react';
 
 const iconMap = {
-  traffic: Icons.Car,
-  air_co2: Icons.Wind,
-  noise: Icons.Volume2,
-  energy: Icons.Zap,
+  // Original 4
+  traffic:     Icons.Car,
+  air_co2:     Icons.Wind,
+  noise:       Icons.Volume2,
+  energy:      Icons.Zap,
+  // New 5
   temperature: Icons.Thermometer,
-  humidity: Icons.Droplet
+  humidity:    Icons.Droplets,
+  wind_speed:  Icons.Gauge,
+  pedestrian:  Icons.Users,
+  waste_fill:  Icons.Trash2,
 };
 
 const labelMap = {
-  traffic: 'Trafic Routier',
-  air_co2: 'Qualité de l\'Air',
-  noise: 'Niveau Sonore',
-  energy: 'Consommation Énergie',
+  // Original 4
+  traffic:     'Trafic Routier',
+  air_co2:     'Qualité de l\'Air',
+  noise:       'Niveau Sonore',
+  energy:      'Consommation Énergie',
+  // New 5
   temperature: 'Température',
-  humidity: 'Humidité'
+  humidity:    'Humidité',
+  wind_speed:  'Vitesse du Vent',
+  pedestrian:  'Flux Piétonnier',
+  waste_fill:  'Remplissage Poubelles',
 };
 
 const MetricCard = ({ type, value, unit, status }) => {

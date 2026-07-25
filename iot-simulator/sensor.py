@@ -49,19 +49,33 @@ FALLBACK_ZONES = ["Tunis-Centre", "Ariana", "Ben-Arous", "La-Marsa", "Sfax", "So
                   "Jendouba", "Gafsa", "Mahdia", "Tozeur", "Beja", "Siliana"]
 
 FALLBACK_SENSORS = [
-    {"type": "traffic",  "unit": "vehicles/min", "min_normal": 10,  "max_normal": 120, "min_anomaly": 200,  "max_anomaly": 400},
-    {"type": "air_co2",  "unit": "ppm",          "min_normal": 350, "max_normal": 800, "min_anomaly": 1200, "max_anomaly": 2000},
-    {"type": "noise",    "unit": "dB",           "min_normal": 35,  "max_normal": 75,  "min_anomaly": 100,  "max_anomaly": 130},
-    {"type": "energy",   "unit": "kWh",          "min_normal": 50,  "max_normal": 500, "min_anomaly": 900,  "max_anomaly": 1500},
+    # ── Original 4 ────────────────────────────────────────────────────────────
+    {"type": "traffic",     "unit": "vehicles/min", "min_normal": 10,   "max_normal": 120,  "min_anomaly": 200,  "max_anomaly": 400},
+    {"type": "air_co2",     "unit": "ppm",          "min_normal": 350,  "max_normal": 800,  "min_anomaly": 1200, "max_anomaly": 2000},
+    {"type": "noise",       "unit": "dB",           "min_normal": 35,   "max_normal": 75,   "min_anomaly": 100,  "max_anomaly": 130},
+    {"type": "energy",      "unit": "kWh",          "min_normal": 50,   "max_normal": 500,  "min_anomaly": 900,  "max_anomaly": 1500},
+    # ── New 5 ─────────────────────────────────────────────────────────────────
+    {"type": "temperature", "unit": "°C",           "min_normal": 12,   "max_normal": 38,   "min_anomaly": 45,   "max_anomaly": 55},
+    {"type": "humidity",    "unit": "%",            "min_normal": 30,   "max_normal": 75,   "min_anomaly": 90,   "max_anomaly": 100},
+    {"type": "wind_speed",  "unit": "km/h",         "min_normal": 5,    "max_normal": 40,   "min_anomaly": 80,   "max_anomaly": 130},
+    {"type": "pedestrian",  "unit": "people/min",   "min_normal": 5,    "max_normal": 200,  "min_anomaly": 400,  "max_anomaly": 700},
+    {"type": "waste_fill",  "unit": "%",            "min_normal": 0,    "max_normal": 70,   "min_anomaly": 85,   "max_anomaly": 100},
 ]
 
 # Topic mapping
 def sensor_type_to_topic(sensor_type: str) -> str:
     mapping = {
-        "traffic": "traffic-data",
-        "air_co2": "air-quality",
-        "noise":   "noise-level",
-        "energy":  "energy-data",
+        # Original 4
+        "traffic":     "traffic-data",
+        "air_co2":     "air-quality",
+        "noise":       "noise-level",
+        "energy":      "energy-data",
+        # New 5
+        "temperature": "temperature-data",
+        "humidity":    "humidity-data",
+        "wind_speed":  "wind-data",
+        "pedestrian":  "pedestrian-data",
+        "waste_fill":  "waste-data",
     }
     return mapping.get(sensor_type, f"sensor-{sensor_type}")
 

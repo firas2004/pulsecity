@@ -19,8 +19,17 @@ const DEFAULT_CITIES = [
 ];
 
 const CHART_COLORS = {
-  traffic: '#3B82F6', air_co2: '#10B981', noise: '#F59E0B',
-  energy: '#8B5CF6', temperature: '#EF4444', humidity: '#06B6D4'
+  // Original 4
+  traffic:     '#3B82F6',
+  air_co2:     '#10B981',
+  noise:       '#F59E0B',
+  energy:      '#8B5CF6',
+  // New 5
+  temperature: '#EF4444',
+  humidity:    '#06B6D4',
+  wind_speed:  '#64748B',
+  pedestrian:  '#F97316',
+  waste_fill:  '#84CC16',
 };
 
 // Skeleton placeholder card
@@ -83,8 +92,12 @@ const ClientDashboard = () => {
       }
 
       // Fetch history for the chart (last 2 hours for each sensor)
+      const ALL_SENSOR_TYPES = [
+        'traffic', 'air_co2', 'noise', 'energy',
+        'temperature', 'humidity', 'wind_speed', 'pedestrian', 'waste_fill',
+      ];
       const historyRes = await Promise.allSettled(
-        ['traffic', 'air_co2', 'noise', 'energy'].map(sensor =>
+        ALL_SENSOR_TYPES.map(sensor =>
           api.get(`/metrics/${city.id}/history?sensor=${sensor}&hours=2`)
             .then(r => ({ sensor, data: r.data }))
         )

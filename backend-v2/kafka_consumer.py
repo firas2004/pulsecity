@@ -11,7 +11,14 @@ from state import latest_metrics, add_metric_to_history
 from agents.threshold_agent import threshold_agent
 from agents.traffic_agent import traffic_agent
 
-TOPICS = ["traffic-data", "air-quality", "noise-level", "energy-data", "alerts"]
+TOPICS = [
+    # Original
+    "traffic-data", "air-quality", "noise-level", "energy-data",
+    # New metrics
+    "temperature-data", "humidity-data", "wind-data", "pedestrian-data", "waste-data",
+    # Alerts
+    "alerts",
+]
 
 def create_kafka_consumer(max_retries: int = 15, delay_seconds: int = 6) -> KafkaConsumer:
     for attempt in range(1, max_retries + 1):
