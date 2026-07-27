@@ -523,10 +523,10 @@ pulsecity/
 
 ---
 
-## Auteur
+## 👥 Contributeur
 
-**Firas** — Stagiaire Cloud Native / DevOps  
-Projet de stage : Plateforme de surveillance urbaine intelligente IoT  
+**Adel Firas** — Lead Cloud Native & Full-Stack Engineer  
+Projet PulseCity — Plateforme de surveillance urbaine intelligente IoT  
 Juillet 2026
 
 ---
