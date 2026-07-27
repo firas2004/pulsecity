@@ -68,7 +68,7 @@ spec:
 
       containers:
         - name: anomaly-detector
-          image: ghcr.io/firas2004/pulsecity-anomaly-detector:sha-1b05b88
+          image: ghcr.io/firas2004/pulsecity-anomaly-detector:sha-25c7af5
           imagePullPolicy: Always
 
           # ── Sécurité du conteneur ────────────────────────────────────────
