@@ -236,16 +236,49 @@ def seed_database():
 
                 print(f"[Database Seed] 🏙 Ville '{item['name']}' insérée.")
             else:
-                # Update missing metadata on existing sensors
+                # Upsert: add any sensor types that don't exist yet for this city
+                # (handles re-seeding when new sensor types are added)
                 for s in default_sensors:
                     sensor_id = f"{city_id}-{s['type']}-001"
                     existing_sensor = db.query(Sensor).filter(Sensor.id == sensor_id).first()
-                    if existing_sensor and existing_sensor.unit is None:
-                        existing_sensor.unit = s["unit"]
-                        existing_sensor.min_normal = s["min_n"]
-                        existing_sensor.max_normal = s["max_n"]
-                        existing_sensor.min_anomaly = s["min_a"]
-                        existing_sensor.max_anomaly = s["max_a"]
+                    if not existing_sensor:
+                        # New sensor type — insert it
+                        sensor = Sensor(
+                            id=sensor_id,
+                            type=s["type"],
+                            city_id=city_id,
+                            enabled=True,
+                            unit=s["unit"],
+                            min_normal=s["min_n"],
+                            max_normal=s["max_n"],
+                            min_anomaly=s["min_a"],
+                            max_anomaly=s["max_a"],
+                        )
+                        db.add(sensor)
+                        print(f"[Database Seed] ➕ Capteur '{s['type']}' ajouté à '{city_id}'")
+
+                        # Add threshold rule if missing
+                        existing_rule = db.query(ThresholdRule).filter(
+                            ThresholdRule.city_id == city_id,
+                            ThresholdRule.metric == s["type"]
+                        ).first()
+                        if not existing_rule:
+                            rule = ThresholdRule(
+                                city_id=city_id,
+                                metric=s["type"],
+                                operator=">",
+                                value=s["threshold"],
+                                level="red"
+                            )
+                            db.add(rule)
+                    else:
+                        # Update metadata if unit is missing
+                        if existing_sensor.unit is None:
+                            existing_sensor.unit = s["unit"]
+                            existing_sensor.min_normal = s["min_n"]
+                            existing_sensor.max_normal = s["max_n"]
+                            existing_sensor.min_anomaly = s["min_a"]
+                            existing_sensor.max_anomaly = s["max_a"]
 
         db.commit()
     except Exception as e:
@@ -311,8 +344,12 @@ async def websocket_endpoint(websocket: WebSocket, city_id: str, token: Optional
                 continue
 
             metrics_data = {}
+
+            # 1. Sensors registered in DB (authoritative source)
+            db_sensor_types = set()
             for sensor in city.sensors:
                 if sensor.enabled:
+                    db_sensor_types.add(sensor.type)
                     metric = latest_metrics.get(sensor.id)
                     if metric:
                         metrics_data[sensor.type] = {**metric, "unit": sensor.unit or metric.get("unit", "unit")}
@@ -323,6 +360,17 @@ async def websocket_endpoint(websocket: WebSocket, city_id: str, token: Optional
                             "timestamp": None,
                             "anomaly": False
                         }
+
+            # 2. Also include any metrics arriving from Kafka that aren't seeded yet
+            # Uses pattern: {city_id}-{sensor_type}-001  (standard IoT simulator naming)
+            prefix = city_id + "-"
+            suffix = "-001"
+            for sensor_id, metric in list(latest_metrics.items()):
+                if sensor_id.startswith(prefix) and sensor_id.endswith(suffix):
+                    # Extract sensor_type from sensor_id
+                    inner = sensor_id[len(prefix):-len(suffix)]  # e.g. "temperature"
+                    if inner and inner not in db_sensor_types and metric.get("value") is not None:
+                        metrics_data[inner] = metric
 
             status_val = city.status
             db.close()

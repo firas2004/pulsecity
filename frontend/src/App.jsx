@@ -1,7 +1,6 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import * as Icons from 'lucide-react';
-import { ThemeToggle } from './theme';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Sidebar from './components/Sidebar';
 
 // Pages
 import Welcome from './pages/Welcome';
@@ -13,6 +12,12 @@ import SensorManager from './pages/admin/SensorManager';
 import ClientDashboard from './pages/client/ClientDashboard';
 import AlertsPanel from './pages/client/AlertsPanel';
 import ChatBot from './pages/client/ChatBot';
+import DetailedMobility from './pages/client/DetailedMobility';
+import DetailedEnvironment from './pages/client/DetailedEnvironment';
+import BeachQuality from './pages/client/BeachQuality';
+import DetailedInfrastructure from './pages/client/DetailedInfrastructure';
+import CityCompare from './pages/client/CityCompare';
+import CityRanking from './pages/client/CityRanking';
 
 // JWT Decoder
 export const decodeToken = (token) => {
@@ -45,150 +50,14 @@ const ClientGuard = ({ children }) => {
   return children;
 };
 
-// ── Nav link style helper ─────────────────────────────────────────────────────
-const navLinkStyle = ({ isActive }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: '6px',
-  padding: '9px 14px',
-  borderRadius: '999px',
-  color: isActive ? 'var(--text-main)' : 'var(--text-muted)',
-  textDecoration: 'none',
-  fontSize: '14px',
-  fontWeight: isActive ? '700' : '500',
-  background: isActive ? 'linear-gradient(135deg, rgba(59,130,246,0.16), rgba(99,102,241,0.14))' : 'var(--surface-2)',
-  border: isActive ? '1px solid rgba(99,102,241,0.3)' : '1px solid var(--border-color)',
-  boxShadow: isActive ? '0 8px 18px rgba(59,130,246,0.18)' : 'none',
-  transition: 'all 0.2s ease',
-});
-
-// ── Admin Layout ──────────────────────────────────────────────────────────────
-const AdminLayout = ({ children }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const username = localStorage.getItem('username') || 'Administrateur';
-
-  // Breadcrumb
-  const crumbs = [{ label: 'Admin', to: '/admin' }];
-  if (location.pathname.includes('/admin/cities/')) {
-    const parts = location.pathname.split('/');
-    const cityId = parts[3];
-    if (cityId) crumbs.push({ label: cityId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()), to: null });
-    if (location.pathname.includes('/sensors')) crumbs.push({ label: 'Capteurs', to: null });
-  } else if (location.pathname === '/admin/clients') {
-    crumbs.push({ label: 'Clients', to: null });
-  }
-
+// ── Unified Layout with Left Navigation Sidebar ──────────────────────────────
+const AppLayout = ({ role = 'client', children }) => {
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--bg-color)' }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 32px', backgroundColor: 'var(--surface)', borderBottom: '1px solid var(--border-color)', boxShadow: 'var(--shadow)', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(12px)' }}>
-        {/* Brand */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'linear-gradient(135deg,#3B82F6,#6366F1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Icons.Building2 size={18} color="#FFF"/>
-          </div>
-          <span style={{ fontSize: '17px', fontWeight: '800', color: 'var(--text-main)', letterSpacing: '-0.5px' }}>
-            PULSE<span style={{ color: '#6366F1' }}>CITY</span>
-          </span>
-          <span style={{ fontSize: '10px', fontWeight: '700', color: '#6366F1', border: '1px solid rgba(99,102,241,0.4)', padding: '2px 8px', borderRadius: '20px', letterSpacing: '1px' }}>ADMIN</span>
-        </div>
-
-        {/* Nav */}
-        <nav style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-          <NavLink to="/admin" end style={navLinkStyle}>
-            <Icons.LayoutDashboard size={15}/>  Villes
-          </NavLink>
-          <NavLink to="/admin/clients" style={navLinkStyle}>
-            <Icons.Users size={15}/> Clients
-          </NavLink>
-        </nav>
-
-        {/* User */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <ThemeToggle />
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 12px', borderRadius: '8px', background: 'var(--surface-2)', border: '1px solid var(--border-color)' }}>
-            <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'linear-gradient(135deg,#3B82F6,#6366F1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '700', color: '#FFF' }}>
-              {username.charAt(0).toUpperCase()}
-            </div>
-            <span style={{ fontSize: '13px', color: 'var(--text-main)', fontWeight: '500' }}>{username}</span>
-          </div>
-          <button onClick={() => { localStorage.clear(); navigate('/login'); }} style={{ padding: '7px 12px', borderRadius: '8px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#F87171', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '5px', transition: 'all 0.2s' }}
-            onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.2)'}
-            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.1)'}
-          >
-            <Icons.LogOut size={14}/> Déconnexion
-          </button>
-        </div>
-      </header>
-
-      {/* Breadcrumb */}
-      <div style={{ padding: '10px 32px', background: 'var(--surface-2)', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}>
-        {crumbs.map((c, i) => (
-          <React.Fragment key={i}>
-            {i > 0 && <span style={{ color: '#374151' }}>/</span>}
-            {c.to ? (
-              <NavLink to={c.to} style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: '500' }}>{c.label}</NavLink>
-            ) : (
-              <span style={{ color: 'var(--text-muted)' }}>{c.label}</span>
-            )}
-          </React.Fragment>
-        ))}
+    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--bg-color)' }}>
+      <Sidebar role={role} />
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflowX: 'hidden' }}>
+        <main style={{ flex: 1, backgroundColor: 'var(--bg-color)' }}>{children}</main>
       </div>
-
-      <main style={{ flex: 1, padding: '32px', backgroundColor: 'var(--bg-color)' }}>{children}</main>
-    </div>
-  );
-};
-
-// ── Client Layout ─────────────────────────────────────────────────────────────
-const ClientLayout = ({ children }) => {
-  const navigate = useNavigate();
-  const username = localStorage.getItem('username') || 'Utilisateur';
-
-  return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--bg-color)' }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 32px', backgroundColor: 'var(--surface)', borderBottom: '1px solid var(--border-color)', boxShadow: 'var(--shadow)', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(12px)' }}>
-        {/* Brand */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'linear-gradient(135deg,#10B981,#3B82F6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Icons.Globe size={18} color="#FFF"/>
-          </div>
-          <span style={{ fontSize: '17px', fontWeight: '800', color: 'var(--text-main)', letterSpacing: '-0.5px' }}>
-            PULSE<span style={{ color: '#10B981' }}>CITY</span>
-          </span>
-          <span style={{ fontSize: '10px', fontWeight: '700', color: '#10B981', border: '1px solid rgba(16,185,129,0.4)', padding: '2px 8px', borderRadius: '20px', letterSpacing: '1px' }}>PORTAL</span>
-        </div>
-
-        <nav style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-          <NavLink to="/client" end style={navLinkStyle}>
-            <Icons.LayoutDashboard size={15}/> Tableau de Bord
-          </NavLink>
-          <NavLink to="/client/alerts" style={navLinkStyle}>
-            <Icons.Bell size={15}/> Alertes
-          </NavLink>
-          <NavLink to="/client/chat" style={navLinkStyle}>
-            <Icons.MessageSquare size={15}/> Assistant IA
-          </NavLink>
-        </nav>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <ThemeToggle />
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 12px', borderRadius: '8px', background: 'var(--surface-2)', border: '1px solid var(--border-color)' }}>
-            <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'linear-gradient(135deg,#10B981,#3B82F6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '700', color: '#FFF' }}>
-              {username.charAt(0).toUpperCase()}
-            </div>
-            <span style={{ fontSize: '13px', color: 'var(--text-main)', fontWeight: '500' }}>{username}</span>
-          </div>
-          <button onClick={() => { localStorage.clear(); navigate('/login'); }} style={{ padding: '7px 12px', borderRadius: '8px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#F87171', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '5px', transition: 'all 0.2s' }}
-            onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.2)'}
-            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.1)'}
-          >
-            <Icons.LogOut size={14}/> Déconnexion
-          </button>
-        </div>
-      </header>
-
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', backgroundColor: 'var(--bg-color)' }}>{children}</main>
     </div>
   );
 };
@@ -204,22 +73,38 @@ function App() {
         {/* Login */}
         <Route path="/login" element={<Login />} />
 
-        {/* Admin portal */}
-        <Route path="/admin" element={<AdminGuard><AdminLayout><AdminDashboard /></AdminLayout></AdminGuard>} />
-        <Route path="/admin/cities/:cityId" element={<AdminGuard><AdminLayout><CityManager /></AdminLayout></AdminGuard>} />
-        <Route path="/admin/cities/:cityId/sensors" element={<AdminGuard><AdminLayout><SensorManager /></AdminLayout></AdminGuard>} />
-        <Route path="/admin/clients" element={<AdminGuard><AdminLayout><ClientManager /></AdminLayout></AdminGuard>} />
+        {/* ── Admin portal ───────────────────────────────────────── */}
+        <Route path="/admin" element={<AdminGuard><AppLayout role="admin"><AdminDashboard /></AppLayout></AdminGuard>} />
+        <Route path="/admin/cities" element={<AdminGuard><AppLayout role="admin"><AdminDashboard /></AppLayout></AdminGuard>} />
+        <Route path="/admin/cities/:cityId" element={<AdminGuard><AppLayout role="admin"><CityManager /></AppLayout></AdminGuard>} />
+        <Route path="/admin/cities/:cityId/sensors" element={<AdminGuard><AppLayout role="admin"><SensorManager /></AppLayout></AdminGuard>} />
+        <Route path="/admin/clients" element={<AdminGuard><AppLayout role="admin"><ClientManager /></AppLayout></AdminGuard>} />
+        {/* Admin domain pages */}
+        <Route path="/admin/mobility" element={<AdminGuard><AppLayout role="admin"><DetailedMobility /></AppLayout></AdminGuard>} />
+        <Route path="/admin/environment" element={<AdminGuard><AppLayout role="admin"><DetailedEnvironment /></AppLayout></AdminGuard>} />
+        <Route path="/admin/beaches" element={<AdminGuard><AppLayout role="admin"><BeachQuality /></AppLayout></AdminGuard>} />
+        <Route path="/admin/infrastructure" element={<AdminGuard><AppLayout role="admin"><DetailedInfrastructure /></AppLayout></AdminGuard>} />
+        <Route path="/admin/compare" element={<AdminGuard><AppLayout role="admin"><CityCompare /></AppLayout></AdminGuard>} />
+        <Route path="/admin/ranking" element={<AdminGuard><AppLayout role="admin"><CityRanking /></AppLayout></AdminGuard>} />
+        <Route path="/admin/alerts" element={<AdminGuard><AppLayout role="admin"><AlertsPanel /></AppLayout></AdminGuard>} />
+        <Route path="/admin/chat" element={<AdminGuard><AppLayout role="admin"><ChatBot /></AppLayout></AdminGuard>} />
 
-        {/* Client portal */}
-        <Route path="/client" element={<ClientGuard><ClientLayout><ClientDashboard /></ClientLayout></ClientGuard>} />
-        <Route path="/client/alerts" element={<ClientGuard><ClientLayout><AlertsPanel /></ClientLayout></ClientGuard>} />
-        <Route path="/client/chat" element={<ClientGuard><ClientLayout><ChatBot /></ClientLayout></ClientGuard>} />
+        {/* ── Client portal ──────────────────────────────────────── */}
+        <Route path="/client" element={<ClientGuard><AppLayout role="client"><ClientDashboard /></AppLayout></ClientGuard>} />
+        <Route path="/client/mobility" element={<ClientGuard><AppLayout role="client"><DetailedMobility /></AppLayout></ClientGuard>} />
+        <Route path="/client/environment" element={<ClientGuard><AppLayout role="client"><DetailedEnvironment /></AppLayout></ClientGuard>} />
+        <Route path="/client/beaches" element={<ClientGuard><AppLayout role="client"><BeachQuality /></AppLayout></ClientGuard>} />
+        <Route path="/client/infrastructure" element={<ClientGuard><AppLayout role="client"><DetailedInfrastructure /></AppLayout></ClientGuard>} />
+        <Route path="/client/compare" element={<ClientGuard><AppLayout role="client"><CityCompare /></AppLayout></ClientGuard>} />
+        <Route path="/client/ranking" element={<ClientGuard><AppLayout role="client"><CityRanking /></AppLayout></ClientGuard>} />
+        <Route path="/client/alerts" element={<ClientGuard><AppLayout role="client"><AlertsPanel /></AppLayout></ClientGuard>} />
+        <Route path="/client/chat" element={<ClientGuard><AppLayout role="client"><ChatBot /></AppLayout></ClientGuard>} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );
-}
+};
 
 export default App;

@@ -1,157 +1,237 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 
-// Coordonnées approximatives des zones pour les marqueurs dans la ville
-const zoneCoordinates = {
-  "tunis-centre": [
-    { name: "Avenue Bourguiba", lat: 36.8002, lon: 10.1860, type: "traffic" },
-    { name: "Place du Passage", lat: 36.8045, lon: 10.1800, type: "air_co2" },
-    { name: "La Fayette", lat: 36.8110, lon: 10.1815, type: "noise" },
-    { name: "Belvédère", lat: 36.8200, lon: 10.1850, type: "energy" }
-  ],
-  "ariana": [
-    { name: "Ariana Centre", lat: 36.8665, lon: 10.1930, type: "traffic" },
-    { name: "Ennasr 2", lat: 36.8580, lon: 10.1700, type: "air_co2" },
-    { name: "Menzah 6", lat: 36.8450, lon: 10.1800, type: "noise" }
-  ],
-  "la-marsa": [
-    { name: "Marsa Plage", lat: 36.8830, lon: 10.3300, type: "traffic" },
-    { name: "Sidi Bou Saïd", lat: 36.8710, lon: 10.3450, type: "noise" },
-    { name: "Gammarth", lat: 36.9150, lon: 10.2980, type: "energy" }
-  ],
-  "sfax": [
-    { name: "Bab Bhar", lat: 34.7330, lon: 10.7630, type: "traffic" },
-    { name: "Route de Téniour", lat: 34.7600, lon: 10.7400, type: "air_co2" }
-  ],
-  "sousse": [
-    { name: "Boulevard du 14 Janvier", lat: 35.8450, lon: 10.6250, type: "traffic" },
-    { name: "Sousse Médina", lat: 35.8270, lon: 10.6380, type: "noise" }
-  ],
-  "ben-arous": [
-    { name: "Zone Industrielle Radès", lat: 36.7680, lon: 10.2750, type: "energy" },
-    { name: "Ben Arous Centre", lat: 36.7531, lon: 10.2222, type: "air_co2" }
-  ]
-};
-
-const METRIC_LABELS = {
-  traffic:  { label: 'Trafic Routier',     unit: 'véh/min', icon: '🚗' },
-  air_co2:  { label: 'CO₂ / Qualité Air', unit: 'ppm',     icon: '💨' },
-  noise:    { label: 'Niveau Sonore',      unit: 'dB',      icon: '🔊' },
-  energy:   { label: 'Consommation',       unit: 'kWh',     icon: '⚡' },
-};
-
-const getPulsingMarker = (status) => {
-  let color = '#10B981';
-  let isPulsing = false;
-  if (status === 'Critical' || status === 'red' || status === 'danger') {
-    color = '#EF4444';
-    isPulsing = true;
-  } else if (status === 'Warning' || status === 'orange' || status === 'warning') {
-    color = '#F59E0B';
+// Extended POI datasets for Tunisian cities
+const cityPois = {
+  "la-marsa": {
+    beaches: [
+      { name: "Plage de La Marsa", lat: 36.8830, lon: 10.3300, status: "Ideal", water_ph: 7.4, temp: "24°C" },
+      { name: "Plage de Gammarth", lat: 36.9150, lon: 10.2980, status: "Ideal", water_ph: 7.6, temp: "25°C" },
+      { name: "Crique de Sidi Bou Saïd", lat: 36.8710, lon: 10.3450, status: "Ideal", water_ph: 7.5, temp: "24°C" },
+    ],
+    parkings: [
+      { name: "Parking Marsa Plage", lat: 36.8845, lon: 10.3280, free: 45, total: 120 },
+      { name: "Parking Saf-Saf", lat: 36.8810, lon: 10.3230, free: 12, total: 80 },
+    ],
+    pedestrians: [
+      { name: "Avenue Habib Bourguiba (Marsa)", lat: 36.8820, lon: 10.3250, count: "140 p/min" },
+      { name: "Place du Saf Saf", lat: 36.8805, lon: 10.3220, count: "95 p/min" },
+    ]
+  },
+  "sousse": {
+    beaches: [
+      { name: "Plage Boujaafar", lat: 35.8350, lon: 10.6380, status: "Ideal", water_ph: 7.5, temp: "26°C" },
+      { name: "Plage Port El Kantaoui", lat: 35.8920, lon: 10.5980, status: "Ideal", water_ph: 7.7, temp: "26°C" },
+      { name: "Plage Las Vegas Sousse", lat: 35.8480, lon: 10.6280, status: "Warning", water_ph: 8.1, temp: "26°C" },
+    ],
+    parkings: [
+      { name: "Parking Port El Kantaoui", lat: 35.8910, lon: 10.5950, free: 85, total: 300 },
+      { name: "Parking Médina Sousse", lat: 35.8260, lon: 10.6350, free: 15, total: 150 },
+    ],
+    pedestrians: [
+      { name: "Boulevard du 14 Janvier", lat: 35.8450, lon: 10.6250, count: "210 p/min" },
+      { name: "Gare de Sousse", lat: 35.8300, lon: 10.6370, count: "180 p/min" },
+    ]
+  },
+  "tunis-centre": {
+    beaches: [],
+    parkings: [
+      { name: "Parking Municipal Lafayette", lat: 36.8120, lon: 10.1800, free: 88, total: 250 },
+      { name: "Parking Place du Passage", lat: 36.8045, lon: 10.1800, free: 32, total: 180 },
+      { name: "Parking Central Kasbah", lat: 36.7970, lon: 10.1700, free: 110, total: 400 },
+    ],
+    pedestrians: [
+      { name: "Avenue Habib Bourguiba", lat: 36.8002, lon: 10.1860, count: "320 p/min" },
+      { name: "Gare TGM Tunis Marine", lat: 36.8015, lon: 10.1940, count: "280 p/min" },
+      { name: "Place Barcelone", lat: 36.7950, lon: 10.1800, count: "410 p/min" },
+    ]
+  },
+  "ariana": {
+    beaches: [],
+    parkings: [
+      { name: "Parking Ariana Centre", lat: 36.8665, lon: 10.1930, free: 54, total: 160 },
+      { name: "Parking Ennasr 2", lat: 36.8580, lon: 10.1700, free: 23, total: 100 },
+    ],
+    pedestrians: [
+      { name: "Station Métro Ariana", lat: 36.8640, lon: 10.1910, count: "230 p/min" },
+      { name: "Avenue Hédi Nouira (Ennasr)", lat: 36.8550, lon: 10.1680, count: "160 p/min" },
+    ]
+  },
+  "bizerte": {
+    beaches: [
+      { name: "Corniche de Bizerte", lat: 37.2800, lon: 9.8780, status: "Ideal", water_ph: 7.4, temp: "23°C" },
+      { name: "Plage Rmel Bizerte", lat: 37.2600, lon: 9.9100, status: "Ideal", water_ph: 7.3, temp: "22°C" },
+      { name: "Plage Les Grottes", lat: 37.3300, lon: 9.8600, status: "Ideal", water_ph: 7.5, temp: "23°C" },
+    ],
+    parkings: [
+      { name: "Parking Vieux Port Bizerte", lat: 37.2750, lon: 9.8730, free: 40, total: 140 }
+    ],
+    pedestrians: [
+      { name: "Vieux Port de Bizerte", lat: 37.2744, lon: 9.8739, count: "190 p/min" }
+    ]
+  },
+  "monastir": {
+    beaches: [
+      { name: "Plage Qaraiya", lat: 35.7720, lon: 10.8320, status: "Ideal", water_ph: 7.6, temp: "26°C" },
+      { name: "Plage Skanes", lat: 35.7800, lon: 10.7700, status: "Ideal", water_ph: 7.5, temp: "26°C" },
+    ],
+    parkings: [
+      { name: "Parking Marina Monastir", lat: 35.7750, lon: 10.8300, free: 62, total: 200 }
+    ],
+    pedestrians: [
+      { name: "Esplanade du Ribat", lat: 35.7710, lon: 10.8330, count: "175 p/min" }
+    ]
+  },
+  "sfax": {
+    beaches: [
+      { name: "Plage Chott El Karkanah", lat: 34.7200, lon: 10.7800, status: "Warning", water_ph: 8.0, temp: "25°C" }
+    ],
+    parkings: [
+      { name: "Parking Bab Bhar", lat: 34.7330, lon: 10.7630, free: 78, total: 320 }
+    ],
+    pedestrians: [
+      { name: "Médina de Sfax", lat: 34.7350, lon: 10.7600, count: "340 p/min" }
+    ]
+  },
+  "mahdia": {
+    beaches: [
+      { name: "Plage Zone Touristique Mahdia", lat: 35.5150, lon: 11.0500, status: "Ideal", water_ph: 7.4, temp: "26°C" },
+      { name: "Plage Salakta", lat: 35.3950, lon: 11.0500, status: "Ideal", water_ph: 7.5, temp: "25°C" }
+    ],
+    parkings: [
+      { name: "Parking Skifa El Kahla", lat: 35.5040, lon: 11.0620, free: 35, total: 110 }
+    ],
+    pedestrians: [
+      { name: "Péninsule Mahdia", lat: 35.5047, lon: 11.0622, count: "130 p/min" }
+    ]
   }
+};
 
-  const pulseClass = isPulsing ? 'marker-pulse' : '';
-
+const createEmojiIcon = (emoji, bg = '#3B82F6') => {
   return L.divIcon({
     html: `
-      <div style="position: relative; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;">
-        <div class="${pulseClass}" style="position: absolute; width: 24px; height: 24px; border-radius: 50%; background-color: ${color}; opacity: 0.35;"></div>
-        <div style="width: 12px; height: 12px; border-radius: 50%; background-color: ${color}; border: 1.5px solid #FFFFFF; z-index: 10; box-shadow: 0 0 6px ${color};"></div>
+      <div style="
+        width: 32px; height: 32px; border-radius: 50%;
+        background: ${bg}; border: 2px solid #FFF;
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-size: 16px;
+      ">
+        ${emoji}
       </div>
     `,
     className: '',
-    iconSize: [28, 28],
-    iconAnchor: [14, 14]
+    iconSize: [32, 32],
+    iconAnchor: [16, 16]
   });
 };
 
 const CityMap = ({ center, cityId, metrics, status }) => {
+  const [showBeaches, setShowBeaches] = useState(true);
+  const [showParkings, setShowParkings] = useState(true);
+  const [showPedestrians, setShowPedestrians] = useState(true);
+
   const mapCenter = center && !isNaN(center[0]) && !isNaN(center[1]) ? center : [36.8065, 10.1815];
-  const zones = zoneCoordinates[cityId] || [];
+  const pois = cityPois[cityId] || { beaches: [], parkings: [], pedestrians: [] };
 
   return (
-    <MapContainer
-      center={mapCenter}
-      zoom={13}
-      style={{ width: '100%', height: '100%', minHeight: '350px' }}
-      key={`${mapCenter[0]}-${mapCenter[1]}`}
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      {zones.map((zone, idx) => {
-        const metricVal = metrics ? metrics[zone.type] : null;
-        const isCritical = metricVal?.anomaly;
-        const activeStatus = isCritical ? 'Critical' : status;
+    <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: '380px', borderRadius: '16px', overflow: 'hidden' }}>
+      {/* ── Filter Layer Toggle Panel ──────────────────────────────── */}
+      <div style={{
+        position: 'absolute', top: '12px', right: '12px', zIndex: 1000,
+        background: 'rgba(15, 23, 42, 0.85)', backdropFilter: 'blur(12px)',
+        border: '1px solid rgba(255, 255, 255, 0.15)', borderRadius: '12px',
+        padding: '8px 12px', display: 'flex', gap: '8px', boxShadow: '0 8px 24px rgba(0,0,0,0.4)'
+      }}>
+        <button
+          onClick={() => setShowBeaches(!showBeaches)}
+          style={{
+            background: showBeaches ? '#0EA5E9' : 'rgba(255,255,255,0.1)',
+            color: '#FFF', border: 'none', borderRadius: '8px', padding: '6px 10px',
+            fontSize: '12px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px'
+          }}
+        >
+          🏖️ Plages ({pois.beaches.length})
+        </button>
+        <button
+          onClick={() => setShowParkings(!showParkings)}
+          style={{
+            background: showParkings ? '#8B5CF6' : 'rgba(255,255,255,0.1)',
+            color: '#FFF', border: 'none', borderRadius: '8px', padding: '6px 10px',
+            fontSize: '12px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px'
+          }}
+        >
+          🅿️ Parkings ({pois.parkings.length})
+        </button>
+        <button
+          onClick={() => setShowPedestrians(!showPedestrians)}
+          style={{
+            background: showPedestrians ? '#F97316' : 'rgba(255,255,255,0.1)',
+            color: '#FFF', border: 'none', borderRadius: '8px', padding: '6px 10px',
+            fontSize: '12px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px'
+          }}
+        >
+          🚶 Piétons ({pois.pedestrians.length})
+        </button>
+      </div>
 
-        return (
-          <Marker
-            key={idx}
-            position={[zone.lat, zone.lon]}
-            icon={getPulsingMarker(activeStatus)}
-          >
+      <MapContainer
+        center={mapCenter}
+        zoom={13}
+        style={{ width: '100%', height: '100%' }}
+        key={`${mapCenter[0]}-${mapCenter[1]}`}
+      >
+        <TileLayer
+          attribution='&copy; OpenStreetMap contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+
+        {/* 🏖️ Beach POIs */}
+        {showBeaches && pois.beaches.map((b, idx) => (
+          <Marker key={`beach-${idx}`} position={[b.lat, b.lon]} icon={createEmojiIcon('🏖️', '#0EA5E9')}>
             <Popup>
-              <div style={{ minWidth: '210px', fontFamily: 'system-ui, sans-serif' }}>
-                {/* Zone name */}
-                <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', fontWeight: '700', color: '#111827', borderBottom: '1px solid #E5E7EB', paddingBottom: '6px' }}>
-                  📍 {zone.name}
-                </h4>
-
-                {/* Primary sensor for this zone */}
-                {metricVal && metricVal.value !== null ? (
-                  <div style={{
-                    padding: '8px 10px', borderRadius: '6px', marginBottom: '8px',
-                    background: isCritical ? '#FEF2F2' : '#F0FDF4',
-                    border: `1px solid ${isCritical ? '#FECACA' : '#BBF7D0'}`
-                  }}>
-                    <div style={{ fontSize: '11px', color: '#6B7280', marginBottom: '2px' }}>
-                      {METRIC_LABELS[zone.type]?.icon} {METRIC_LABELS[zone.type]?.label}
-                    </div>
-                    <div style={{ fontSize: '22px', fontWeight: '800', color: isCritical ? '#EF4444' : '#10B981', lineHeight: 1.1 }}>
-                      {Number(metricVal.value).toFixed(1)}
-                      <span style={{ fontSize: '11px', fontWeight: '400', marginLeft: '4px', color: '#6B7280' }}>
-                        {metricVal.unit || METRIC_LABELS[zone.type]?.unit}
-                      </span>
-                    </div>
-                    {isCritical && (
-                      <div style={{ fontSize: '11px', color: '#EF4444', fontWeight: '700', marginTop: '3px' }}>
-                        ⚠ ANOMALIE DÉTECTÉE
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div style={{ padding: '6px 8px', background: '#F9FAFB', borderRadius: '6px', marginBottom: '8px', fontSize: '12px', color: '#9CA3AF' }}>
-                    {METRIC_LABELS[zone.type]?.icon} En attente des données live...
-                  </div>
-                )}
-
-                {/* All other metrics for context */}
-                {metrics && (
-                  <div style={{ borderTop: '1px solid #F3F4F6', paddingTop: '6px' }}>
-                    {Object.keys(METRIC_LABELS).filter(k => k !== zone.type).map(key => {
-                      const m = metrics[key];
-                      if (!m || m.value === null || m.value === undefined) return null;
-                      const info = METRIC_LABELS[key];
-                      const isAnom = m.anomaly;
-                      return (
-                        <div key={key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', padding: '3px 0', color: '#374151' }}>
-                          <span style={{ color: '#6B7280' }}>{info.icon} {info.label}</span>
-                          <span style={{ fontWeight: '600', color: isAnom ? '#EF4444' : '#374151' }}>
-                            {Number(m.value).toFixed(1)} <span style={{ fontWeight: '400', color: '#9CA3AF' }}>{m.unit}</span>
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
+              <div style={{ fontFamily: 'system-ui, sans-serif', padding: '4px' }}>
+                <h4 style={{ margin: '0 0 6px 0', fontSize: '14px', color: '#0284C7' }}>🌊 {b.name}</h4>
+                <div style={{ fontSize: '12px', color: '#334155', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <span>🟢 <strong>Baignade :</strong> {b.status}</span>
+                  <span>💧 <strong>Qualité Eau :</strong> {b.water_ph} pH</span>
+                  <span>🌡️ <strong>Temp. Mer :</strong> {b.temp}</span>
+                </div>
               </div>
             </Popup>
           </Marker>
-        );
-      })}
-    </MapContainer>
+        ))}
+
+        {/* 🅿️ Parking POIs */}
+        {showParkings && pois.parkings.map((p, idx) => (
+          <Marker key={`parking-${idx}`} position={[p.lat, p.lon]} icon={createEmojiIcon('🅿️', '#8B5CF6')}>
+            <Popup>
+              <div style={{ fontFamily: 'system-ui, sans-serif', padding: '4px' }}>
+                <h4 style={{ margin: '0 0 6px 0', fontSize: '14px', color: '#6D28D9' }}>🚗 {p.name}</h4>
+                <div style={{ fontSize: '12px', color: '#334155', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <span>🅿️ <strong>Places libres :</strong> <strong style={{ color: '#10B981' }}>{p.free}</strong> / {p.total}</span>
+                  <span>📊 <strong>Taux d'occupation :</strong> {Math.round(((p.total - p.free) / p.total) * 100)}%</span>
+                </div>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+
+        {/* 🚶 Pedestrian POIs */}
+        {showPedestrians && pois.pedestrians.map((ped, idx) => (
+          <Marker key={`ped-${idx}`} position={[ped.lat, ped.lon]} icon={createEmojiIcon('🚶', '#F97316')}>
+            <Popup>
+              <div style={{ fontFamily: 'system-ui, sans-serif', padding: '4px' }}>
+                <h4 style={{ margin: '0 0 6px 0', fontSize: '14px', color: '#C2410C' }}>🚶 {ped.name}</h4>
+                <div style={{ fontSize: '12px', color: '#334155' }}>
+                  <span>👥 <strong>Affluence piétonne :</strong> {ped.count}</span>
+                </div>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+      </MapContainer>
+    </div>
   );
 };
 

@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Bot, User, Sparkles, RefreshCw, Key, Eye, EyeOff, Check, X, ChevronDown } from 'lucide-react';
+import { Send, Bot, User, Sparkles, RefreshCw, Key, Eye, EyeOff, Check, X, ChevronDown, Waves } from 'lucide-react';
 import api from '../../services/api';
 import { connectWebSocket } from '../../services/websocket';
 
-/* ─── Metric context helpers ─────────────────────────────────── */
+/* ─── Metric & Beach context helpers ─────────────────────────────── */
 const METRIC_LABELS = {
   traffic: 'Trafic Routier (v/min)', air_co2: 'Qualité Air CO₂ (ppm)',
   noise: 'Niveau Sonore (dB)', energy: 'Énergie (kWh)',
@@ -13,26 +13,62 @@ const METRIC_LABELS = {
   parking: 'Parking libres (%)', foot_traffic: 'Flux Gare (p/min)',
 };
 
-const buildMetricContext = (metrics, cityName) => {
-  if (!metrics || Object.keys(metrics).length === 0) return '';
-  const lines = Object.entries(metrics).map(([k, v]) => {
-    if (!v) return null;
-    const label = METRIC_LABELS[k] || k;
-    const status = v.anomaly || v.status === 'Critical' ? '⚠ ANOMALIE' : v.status === 'Warning' ? '! Avertissement' : '✓ Normal';
-    return `• ${label}: ${Number(v.value || 0).toFixed(1)} [${status}]`;
-  }).filter(Boolean);
+const COASTAL_BEACH_KNOWLEDGE = {
+  'la-marsa': ['Plage de La Marsa', 'Plage de Gammarth', 'Crique de Sidi Bou Saïd'],
+  'sousse': ['Plage Boujaafar (centre-ville)', 'Plage Port El Kantaoui', 'Plage Las Vegas Sousse'],
+  'bizerte': ['Corniche de Bizerte', 'Plage Les Grottes (Cap Blanc)', 'Plage Rmel'],
+  'monastir': ['Plage Qaraiya (au pied du Ribat)', 'Plage Skanès'],
+  'nabeul': ['Plage de Kélibia Fort (sable blanc)', 'Plage Yasmine Hammamet', 'Plage de Nabeul'],
+  'mahdia': ['Plage Salakta', 'Plage Zone Touristique Mahdia'],
+  'sfax': ['Plage Chott El Karkanah'],
+  'gabes': ['Plage Chott Essalam']
+};
 
-  return `\n\n---\n📡 Données capteurs temps réel pour ${cityName}:\n${lines.join('\n')}\n---\n`;
+const buildMetricContext = (metrics, cityName, cityId) => {
+  let text = '';
+  if (metrics && Object.keys(metrics).length > 0) {
+    const lines = Object.entries(metrics).map(([k, v]) => {
+      if (!v) return null;
+      const label = METRIC_LABELS[k] || k;
+      const status = v.anomaly || v.status === 'Critical' ? '⚠ ANOMALIE' : v.status === 'Warning' ? '! Avertissement' : '✓ Normal';
+      return `• ${label}: ${Number(v.value || 0).toFixed(1)} [${status}]`;
+    }).filter(Boolean);
+
+    text += `\n\n---\n📡 Données capteurs temps réel pour ${cityName}:\n${lines.join('\n')}\n`;
+  }
+
+  // Add Coastal Beach Knowledge
+  const beaches = COASTAL_BEACH_KNOWLEDGE[cityId];
+  if (beaches && beaches.length > 0) {
+    const phVal = metrics?.water_quality?.value;
+    const windVal = metrics?.wind_speed?.value;
+    const tempVal = metrics?.temperature?.value;
+    
+    let swimStatus = '🟢 Baignade Autorisée & Idéale (Eau propre & mer calme)';
+    if (phVal && (phVal < 6.5 || phVal > 8.5)) swimStatus = '🔴 Baignade Interdite (Anomalie pH de l\'eau détectée)';
+    else if (windVal && windVal > 40) swimStatus = '🔴 Mer Agitée / Vent Fort (>40 km/h)';
+    else if (windVal && windVal > 20) swimStatus = '🟡 Baignade Prudence (Vent modéré)';
+
+    text += `\n🏖️ Données & Infos Plages/Baignade pour ${cityName}:\n`;
+    text += `• Plages principales accessibles: ${beaches.join(', ')}\n`;
+    text += `• Condition Baignade Actuelle: ${swimStatus}\n`;
+    if (tempVal) text += `• Température de l'air/mer: ${Number(tempVal).toFixed(1)}°C\n`;
+    if (phVal) text += `• Qualité de l'Eau pH: ${Number(phVal).toFixed(2)}\n`;
+    text += `---\n`;
+  } else {
+    text += `\nℹ Note: ${cityName} est une zone urbaine continentale (pas de plage maritime directe).\n---\n`;
+  }
+
+  return text;
 };
 
 const SUGGESTED = [
+  { label: 'Plages & conditions de baignade à Sousse / La Marsa ?', icon: '🏖️' },
   { label: 'Y a-t-il des embouteillages ?', icon: '🚦' },
   { label: 'Quel est le meilleur itinéraire maintenant ?', icon: '🗺️' },
-  { label: 'Quelle est la qualité de l\'air ?', icon: '🌫️' },
-  { label: 'Température et météo actuelles ?', icon: '🌡️' },
-  { label: 'Anomalies détectées ?', icon: '⚠️' },
-  { label: 'État des parkings ?', icon: '🅿️' },
-  { label: 'Niveau de bruit dans la ville ?', icon: '🔊' },
+  { label: 'Quelle est la qualité de l\'air et la température ?', icon: '🌡️' },
+  { label: 'Anomalies et alertes détectées ?', icon: '⚠️' },
+  { label: 'Disponibilité des places de parking ?', icon: '🅿️' },
   { label: 'Qualité de l\'eau potable ?', icon: '💧' },
 ];
 
@@ -56,12 +92,12 @@ const renderMd = (text) => text
 const ChatBot = () => {
   const [messages, setMessages] = useState([{
     role: 'assistant',
-    content: '👋 Bonjour ! Je suis **PulseCity Brain AI** — votre assistant intelligent connecté en temps réel aux capteurs de votre ville.\n\nPosez-moi n\'importe quelle question : trafic, qualité de l\'air, température, parkings, itinéraires sans embouteillages...',
+    content: '👋 Bonjour ! Je suis **PulseCity Brain AI** — votre assistant intelligent connecté en temps réel aux capteurs et plages de votre ville.\n\nPosez-moi n\'importe quelle question : plages de Sousse, baignade à La Marsa, trafic, qualité de l\'air, parkings, itinéraires...',
     timestamp: new Date()
   }]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [selectedCity, setSelectedCity] = useState(DEFAULT_CITIES[0]);
+  const [selectedCity, setSelectedCity] = useState(DEFAULT_CITIES[4]); // Sousse default
   const [metrics, setMetrics] = useState({});
   const [groqKey, setGroqKey] = useState(() => localStorage.getItem('pulsecity_groq_key') || '');
   const [showKeyPanel, setShowKeyPanel] = useState(false);
@@ -99,23 +135,23 @@ const ChatBot = () => {
     }).catch(() => {});
   }, [selectedCity.id]);
 
-  const saveApiKey = (key) => {
-    localStorage.setItem('pulsecity_groq_key', key.trim());
-    setGroqKey(key.trim());
+  const handleSaveKey = () => {
+    localStorage.setItem('pulsecity_groq_key', groqKey.trim());
     setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 2000);
+    setTimeout(() => setSaveSuccess(false), 2500);
   };
 
-  const sendMessage = async (text) => {
-    const question = text || input.trim();
-    if (!question || loading) return;
+  const handleSend = async (overrideText) => {
+    const textToSend = overrideText || input;
+    if (!textToSend.trim() || loading) return;
 
-    const metricCtx = buildMetricContext(metrics, selectedCity.name);
-    const enriched = question + metricCtx;
-
-    setMessages(prev => [...prev, { role: 'user', content: question, timestamp: new Date() }]);
-    setInput('');
+    const userMsg = { role: 'user', content: textToSend.trim(), timestamp: new Date() };
+    setMessages(prev => [...prev, userMsg]);
+    if (!overrideText) setInput('');
     setLoading(true);
+
+    const metricCtx = buildMetricContext(metrics, selectedCity.name, selectedCity.id);
+    const enriched = textToSend.trim() + metricCtx;
 
     try {
       const res = await api.post('/chat', {
@@ -147,8 +183,6 @@ const ChatBot = () => {
     setConversationId(null);
   };
 
-  const metricCount = Object.keys(metrics).length;
-
   return (
     <div style={{
       height: 'calc(100vh - 60px)',
@@ -168,302 +202,157 @@ const ChatBot = () => {
         {/* Brand */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{
-            width: '42px', height: '42px', borderRadius: '14px',
-            background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+            width: '36px', height: '36px', borderRadius: '10px',
+            background: 'linear-gradient(135deg,#6366F1,#8B5CF6)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 8px 24px rgba(99,102,241,0.35)',
+            boxShadow: '0 0 16px rgba(99,102,241,0.4)',
           }}>
-            <Sparkles size={20} style={{ color: '#FFF' }} />
+            <Sparkles size={20} color="#FFF" />
           </div>
           <div>
-            <div style={{ fontSize: '15px', fontWeight: '800', color: '#F1F5F9' }}>Brain AI</div>
-            <div style={{ fontSize: '11px', color: '#64748B' }}>Assistant PulseCity</div>
+            <div style={{ color: '#FFF', fontWeight: '700', fontSize: '15px' }}>PulseCity Brain</div>
+            <div style={{ color: '#818CF8', fontSize: '11px', fontWeight: '500' }}>Assistant IA & Plages</div>
           </div>
         </div>
 
-        {/* Live sensor status */}
-        <div style={{
-          padding: '12px', borderRadius: '14px',
-          background: metricCount > 0 ? 'rgba(16,185,129,0.08)' : 'rgba(100,116,139,0.08)',
-          border: `1px solid ${metricCount > 0 ? 'rgba(16,185,129,0.2)' : 'rgba(100,116,139,0.15)'}`,
-        }}>
-          <div style={{ fontSize: '11px', fontWeight: '700', color: metricCount > 0 ? '#10B981' : '#64748B',
-            textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '6px' }}>
-            {metricCount > 0 ? `✓ ${metricCount} capteurs connectés` : '◌ En attente des capteurs...'}
-          </div>
-          <p style={{ fontSize: '12px', color: '#94A3B8', lineHeight: 1.5, margin: 0 }}>
-            Mes réponses intègrent les données <strong>temps réel</strong> de {selectedCity.name}.
-            Demandez n'importe quelle métrique!
-          </p>
-        </div>
-
-        {/* City selector */}
-        <div>
-          <div style={{ fontSize: '11px', color: '#475569', fontWeight: '700',
-            textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>Ville active</div>
-          <div style={{ position: 'relative' }}>
-            <select value={selectedCity.id}
-              onChange={e => { const c = DEFAULT_CITIES.find(x => x.id === e.target.value); if (c) setSelectedCity(c); }}
-              style={{
-                width: '100%', padding: '9px 32px 9px 12px',
-                background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '10px', color: '#F1F5F9', fontSize: '13px', fontWeight: '600',
-                cursor: 'pointer', outline: 'none', appearance: 'none',
-              }}>
-              {DEFAULT_CITIES.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-            <ChevronDown size={14} style={{ position: 'absolute', right: '10px', top: '50%',
-              transform: 'translateY(-50%)', color: '#64748B', pointerEvents: 'none' }} />
-          </div>
-        </div>
-
-        {/* Suggestions */}
-        <div>
-          <div style={{ fontSize: '11px', color: '#475569', fontWeight: '700',
-            textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>Questions rapides</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            {SUGGESTED.map((q, i) => (
-              <button key={i} onClick={() => sendMessage(q.label)} disabled={loading}
-                style={{
-                  padding: '9px 12px', borderRadius: '10px', fontSize: '12px',
-                  background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
-                  color: '#94A3B8', cursor: 'pointer', textAlign: 'left',
-                  display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.15s',
-                  fontFamily: 'inherit',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.12)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.3)'; e.currentTarget.style.color = '#C7D2FE'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'; e.currentTarget.style.color = '#94A3B8'; }}>
-                <span style={{ fontSize: '14px' }}>{q.icon}</span>
-                <span style={{ lineHeight: 1.4 }}>{q.label}</span>
-              </button>
+        {/* City Selector */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <label style={{ color: '#94A3B8', fontSize: '11px', fontWeight: '600', letterSpacing: '0.5px' }}>
+            VILLE SELECTIONNÉE
+          </label>
+          <select
+            value={selectedCity.id}
+            onChange={e => setSelectedCity(DEFAULT_CITIES.find(c => c.id === e.target.value) || DEFAULT_CITIES[0])}
+            style={{
+              background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)',
+              borderRadius: '10px', color: '#FFF', padding: '10px 12px', fontSize: '13px',
+              cursor: 'pointer', outline: 'none',
+            }}
+          >
+            {DEFAULT_CITIES.map(c => (
+              <option key={c.id} value={c.id} style={{ background: '#0D1B2A', color: '#FFF' }}>
+                📍 {c.name}
+              </option>
             ))}
-          </div>
+          </select>
         </div>
 
-        {/* Spacer */}
-        <div style={{ flex: 1 }} />
-
-        {/* API Key */}
-        <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '12px' }}>
-          <button onClick={() => setShowKeyPanel(!showKeyPanel)} style={{
-            width: '100%', padding: '9px 12px', borderRadius: '10px', fontSize: '12px',
-            background: groqKey ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
-            border: `1px solid ${groqKey ? 'rgba(16,185,129,0.25)' : 'rgba(239,68,68,0.25)'}`,
-            color: groqKey ? '#10B981' : '#EF4444', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', fontFamily: 'inherit',
-          }}>
-            <Key size={13} />
-            {groqKey ? '✓ Clé API configurée' : '✗ Configurer la clé API Groq'}
-          </button>
-          {showKeyPanel && (
-            <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <div style={{ position: 'relative' }}>
-                <input
-                  type={showKeyPassword ? 'text' : 'password'}
-                  placeholder="gsk_..."
-                  value={groqKey}
-                  onChange={e => setGroqKey(e.target.value)}
-                  style={{
-                    width: '100%', padding: '9px 36px 9px 10px',
-                    background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: '8px', color: '#F1F5F9', fontSize: '12px', outline: 'none',
-                    boxSizing: 'border-box', fontFamily: 'monospace',
-                  }}
-                />
-                <button type="button" onClick={() => setShowKeyPassword(!showKeyPassword)}
-                  style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)',
-                    background: 'none', border: 'none', color: '#64748B', cursor: 'pointer' }}>
-                  {showKeyPassword ? <EyeOff size={14} /> : <Eye size={14} />}
-                </button>
-              </div>
-              <button onClick={() => saveApiKey(groqKey)} style={{
-                padding: '9px', borderRadius: '8px', fontSize: '12px', fontWeight: '700',
-                background: saveSuccess ? '#10B981' : 'linear-gradient(135deg, #6366F1, #8B5CF6)',
-                border: 'none', color: '#FFF', cursor: 'pointer', display: 'flex',
-                alignItems: 'center', justifyContent: 'center', gap: '6px', fontFamily: 'inherit',
-              }}>
-                {saveSuccess ? <><Check size={14} /> Enregistré!</> : 'Sauvegarder'}
-              </button>
-            </div>
-          )}
+        {/* Suggested questions */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <label style={{ color: '#94A3B8', fontSize: '11px', fontWeight: '600', letterSpacing: '0.5px' }}>
+            QUESTIONS SUGGÉRÉES
+          </label>
+          {SUGGESTED.map((s, i) => (
+            <button
+              key={i}
+              onClick={() => handleSend(s.label)}
+              style={{
+                background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
+                borderRadius: '8px', color: '#CBD5E1', padding: '8px 10px', fontSize: '12px',
+                textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s',
+                display: 'flex', alignItems: 'center', gap: '8px',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(99,102,241,0.15)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+            >
+              <span>{s.icon}</span>
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.label}</span>
+            </button>
+          ))}
         </div>
+
+        {/* Clear chat */}
+        <button
+          onClick={clearChat}
+          style={{
+            marginTop: 'auto', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)',
+            color: '#F87171', borderRadius: '8px', padding: '8px 12px', fontSize: '12px',
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
+          }}
+        >
+          <RefreshCw size={12} /> Réinitialiser le Chat
+        </button>
       </aside>
 
-      {/* ── CHAT PANEL ────────────────────────────────────────── */}
-      <section style={{ display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
-
-        {/* Header */}
-        <div style={{
-          padding: '14px 22px', borderBottom: '1px solid rgba(255,255,255,0.06)',
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          background: 'rgba(0,0,0,0.2)', flexShrink: 0,
-        }}>
-          <div>
-            <div style={{ fontSize: '11px', color: '#6366F1', fontWeight: '700',
-              letterSpacing: '0.12em', textTransform: 'uppercase' }}>IA · Ville connectée</div>
-            <h2 style={{ fontSize: '17px', fontWeight: '800', color: '#F1F5F9', margin: '2px 0 0' }}>
-              Assistant Urbain — {selectedCity.name}
-            </h2>
-          </div>
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            {metricCount > 0 && (
-              <div style={{ fontSize: '11px', padding: '4px 10px', borderRadius: '20px',
-                background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.25)',
-                color: '#10B981', fontWeight: '600' }}>
-                ● {metricCount} capteurs actifs
-              </div>
-            )}
-            <button onClick={clearChat} title="Nouvelle conversation" style={{
-              background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: '8px', padding: '7px', cursor: 'pointer', color: '#94A3B8',
-              display: 'flex', alignItems: 'center',
-            }}>
-              <RefreshCw size={14} />
-            </button>
-          </div>
-        </div>
+      {/* ── CHAT MAIN PANEL ────────────────────────────────────── */}
+      <main style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
 
         {/* Messages */}
-        <div style={{
-          flex: 1, overflowY: 'auto', padding: '20px 22px',
-          display: 'flex', flexDirection: 'column', gap: '16px',
-        }}>
-          {messages.map((msg, idx) => (
-            <div key={idx} style={{
-              display: 'flex',
-              flexDirection: msg.role === 'user' ? 'row-reverse' : 'row',
-              alignItems: 'flex-start', gap: '10px',
-            }}>
-              {/* Avatar */}
-              <div style={{
-                width: '34px', height: '34px', borderRadius: '50%', flexShrink: 0,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: msg.role === 'user'
-                  ? 'linear-gradient(135deg, #3B82F6, #6366F1)'
-                  : 'linear-gradient(135deg, #8B5CF6, #EC4899)',
-                boxShadow: `0 4px 12px ${msg.role === 'user' ? 'rgba(59,130,246,0.3)' : 'rgba(139,92,246,0.3)'}`,
-              }}>
-                {msg.role === 'user' ? <User size={15} style={{ color: '#fff' }} /> : <Bot size={15} style={{ color: '#fff' }} />}
-              </div>
-
-              {/* Bubble */}
-              <div style={{
-                maxWidth: '72%',
-                padding: '12px 16px',
-                borderRadius: msg.role === 'user' ? '18px 4px 18px 18px' : '4px 18px 18px 18px',
-                background: msg.role === 'user'
-                  ? 'linear-gradient(135deg, #3B82F6, #6366F1)'
-                  : msg.isError ? 'rgba(239,68,68,0.1)' : 'rgba(255,255,255,0.05)',
-                border: `1px solid ${msg.isError ? 'rgba(239,68,68,0.3)' : msg.role === 'user' ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)'}`,
-                color: msg.isError ? '#FCA5A5' : '#F1F5F9',
-              }}>
-                <div style={{ fontSize: '14px', lineHeight: 1.7 }}
-                  dangerouslySetInnerHTML={{ __html: renderMd(msg.content) }} />
-                <div style={{ fontSize: '10px', color: msg.role === 'user' ? 'rgba(255,255,255,0.6)' : '#475569',
-                  marginTop: '6px', textAlign: msg.role === 'user' ? 'right' : 'left' }}>
-                  {msg.timestamp.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {messages.map((m, idx) => (
+            <div key={idx} style={{ display: 'flex', gap: '12px', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
+              {m.role === 'assistant' && (
+                <div style={{
+                  width: '32px', height: '32px', borderRadius: '50%',
+                  background: 'linear-gradient(135deg,#6366F1,#8B5CF6)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0, marginTop: '2px',
+                }}>
+                  <Bot size={18} color="#FFF" />
                 </div>
+              )}
+              <div style={{
+                maxWidth: '75%',
+                padding: '14px 18px',
+                borderRadius: m.role === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
+                background: m.role === 'user' ? 'linear-gradient(135deg,#4F46E5,#6366F1)' : 'rgba(255,255,255,0.06)',
+                border: m.role === 'user' ? 'none' : '1px solid rgba(255,255,255,0.1)',
+                color: '#F8FAFC',
+                fontSize: '14px',
+                lineHeight: '1.6',
+                boxShadow: m.role === 'user' ? '0 4px 12px rgba(79,70,229,0.3)' : 'none',
+              }}>
+                <div dangerouslySetInnerHTML={{ __html: renderMd(m.content) }} />
               </div>
             </div>
           ))}
 
-          {/* Typing indicator */}
           {loading && (
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-              <div style={{ width: '34px', height: '34px', borderRadius: '50%',
-                background: 'linear-gradient(135deg, #8B5CF6, #EC4899)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Bot size={15} style={{ color: '#fff' }} />
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg,#6366F1,#8B5CF6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Bot size={18} color="#FFF" />
               </div>
-              <div style={{ padding: '12px 16px', borderRadius: '4px 18px 18px 18px',
-                background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
-                display: 'flex', gap: '4px', alignItems: 'center' }}>
-                {[0, 1, 2].map(i => (
-                  <span key={i} style={{
-                    width: '6px', height: '6px', borderRadius: '50%', background: '#8B5CF6',
-                    animation: `bounce 1.2s ${i * 0.2}s infinite`,
-                    display: 'inline-block',
-                  }} />
-                ))}
+              <div style={{ padding: '12px 18px', borderRadius: '18px', background: 'rgba(255,255,255,0.06)', color: '#94A3B8', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Sparkles size={16} style={{ animation: 'spin 2s linear infinite' }} /> Analyse en temps réel des données & plages...
               </div>
             </div>
           )}
+
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input */}
-        <div style={{
-          padding: '14px 18px 16px', borderTop: '1px solid rgba(255,255,255,0.06)',
-          background: 'rgba(0,0,0,0.2)', flexShrink: 0,
-        }}>
-          {/* Quick-access chips when conversation just started */}
-          {messages.length <= 2 && (
-            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '10px' }}>
-              {SUGGESTED.slice(0, 4).map((q, i) => (
-                <button key={i} onClick={() => sendMessage(q.label)} disabled={loading}
-                  style={{
-                    padding: '5px 12px', borderRadius: '20px', fontSize: '12px',
-                    background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.25)',
-                    color: '#A5B4FC', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '500',
-                    display: 'flex', alignItems: 'center', gap: '5px',
-                  }}>
-                  {q.icon} {q.label}
-                </button>
-              ))}
-            </div>
-          )}
-
-          <div style={{
-            display: 'flex', gap: '10px', alignItems: 'flex-end',
-            padding: '10px 12px',
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: '14px',
-          }}>
-            <textarea
+        {/* Input box */}
+        <div style={{ padding: '16px 32px 24px 32px', background: 'rgba(0,0,0,0.3)', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <form onSubmit={e => { e.preventDefault(); handleSend(); }} style={{ display: 'flex', gap: '12px' }}>
+            <input
               ref={inputRef}
+              type="text"
               value={input}
               onChange={e => setInput(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-              placeholder={`Posez votre question sur ${selectedCity.name}... (Entrée pour envoyer)`}
-              disabled={loading}
-              rows={1}
+              placeholder={`Posez une question sur ${selectedCity.name} (ex: plages de Sousse, baignade, trafic, air...)`}
               style={{
-                flex: 1, background: 'none', border: 'none', outline: 'none',
-                color: '#F1F5F9', fontSize: '14px', resize: 'none',
-                lineHeight: '1.6', fontFamily: 'inherit', maxHeight: '120px', overflowY: 'auto',
+                flex: 1, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.15)',
+                borderRadius: '14px', padding: '14px 20px', color: '#FFF', fontSize: '14px',
+                outline: 'none', transition: 'all 0.2s',
               }}
-              onInput={e => {
-                e.target.style.height = 'auto';
-                e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
-              }}
+              onFocus={e => e.target.style.borderColor = '#6366F1'}
+              onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.15)'}
             />
-            <button onClick={() => sendMessage()} disabled={loading || !input.trim()} style={{
-              width: '40px', height: '40px', borderRadius: '10px', border: 'none',
-              background: input.trim() && !loading
-                ? 'linear-gradient(135deg, #6366F1, #8B5CF6)'
-                : 'rgba(255,255,255,0.06)',
-              cursor: input.trim() && !loading ? 'pointer' : 'not-allowed',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              transition: 'all 0.2s', flexShrink: 0,
-              boxShadow: input.trim() && !loading ? '0 4px 12px rgba(99,102,241,0.4)' : 'none',
-            }}>
-              <Send size={16} style={{ color: input.trim() && !loading ? '#FFF' : '#475569' }} />
+            <button
+              type="submit"
+              disabled={loading || !input.trim()}
+              style={{
+                background: 'linear-gradient(135deg,#6366F1,#8B5CF6)', border: 'none',
+                borderRadius: '14px', padding: '0 24px', color: '#FFF', cursor: 'pointer',
+                opacity: loading || !input.trim() ? 0.5 : 1, transition: 'all 0.2s',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <Send size={18} />
             </button>
-          </div>
-          <p style={{ fontSize: '10px', color: '#334155', textAlign: 'center', marginTop: '6px', margin: '6px 0 0' }}>
-            L'IA utilise les données capteurs en temps réel · Alimenté par Groq LLM
-          </p>
+          </form>
         </div>
-      </section>
-
-      {/* Bounce animation */}
-      <style>{`
-        @keyframes bounce {
-          0%, 60%, 100% { transform: translateY(0); }
-          30% { transform: translateY(-6px); }
-        }
-      `}</style>
+      </main>
     </div>
   );
 };
