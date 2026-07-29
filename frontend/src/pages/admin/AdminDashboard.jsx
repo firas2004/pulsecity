@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Edit3, Trash2, MapPin, Activity, X, Check, Sparkles, Radar, Users, Filter, ShieldAlert, Gauge, BellRing, ArrowRight, Clock3 } from 'lucide-react';
 import AlertBadge from '../../components/AlertBadge';
+import ExportButton from '../../components/ExportButton';
 import api from '../../services/api';
 
 const EMPTY_CITY = { name: '', city_id: '', lat: '', lon: '', description: '' };
@@ -91,7 +92,7 @@ const AdminDashboard = () => {
 
   const grafanaBaseUrl = import.meta.env.VITE_GRAFANA_URL || '/grafana';
   const grafanaDashboardUrl = `${grafanaBaseUrl.replace(/\/$/, '')}/d/pulsecity-iot-v1/pulsecity-iot-v1`;
-  const grafanaEmbedUrl = `${grafanaDashboardUrl}?orgId=1&refresh=10s`;
+  const grafanaEmbedUrl = `${grafanaDashboardUrl}?orgId=1&refresh=10s&from=now-24h&to=now`;
 
   const openCreate = () => {
     setEditingCity(null);
@@ -353,6 +354,7 @@ const AdminDashboard = () => {
                     onClick={() => navigate(`/admin/cities/${cityKey}/sensors`)}>
                     <Radar size={14} /> Capteurs
                   </button>
+                  <ExportButton cityId={cityKey} cityName={city.name} />
                   <button className="btn btn-secondary" style={{ padding: '8px 10px' }} onClick={() => openEdit(city)}>
                     <Edit3 size={14} />
                   </button>

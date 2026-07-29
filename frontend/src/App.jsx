@@ -9,6 +9,8 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import CityManager from './pages/admin/CityManager';
 import ClientManager from './pages/admin/ClientManager';
 import SensorManager from './pages/admin/SensorManager';
+import IssueManager from './pages/admin/IssueManager';
+import ResourceAllocation from './pages/admin/ResourceAllocation';
 import ClientDashboard from './pages/client/ClientDashboard';
 import AlertsPanel from './pages/client/AlertsPanel';
 import ChatBot from './pages/client/ChatBot';
@@ -18,6 +20,10 @@ import BeachQuality from './pages/client/BeachQuality';
 import DetailedInfrastructure from './pages/client/DetailedInfrastructure';
 import CityCompare from './pages/client/CityCompare';
 import CityRanking from './pages/client/CityRanking';
+import ReportIssue from './pages/client/ReportIssue';
+import AlertPreferences from './pages/client/AlertPreferences';
+import PublicBeachView from './pages/PublicBeachView';
+import TripSimulator from './pages/client/TripSimulator';
 
 // JWT Decoder
 export const decodeToken = (token) => {
@@ -73,12 +79,17 @@ function App() {
         {/* Login */}
         <Route path="/login" element={<Login />} />
 
+        {/* Public Beach Tourism Widget */}
+        <Route path="/beaches/:cityId" element={<PublicBeachView />} />
+
         {/* ── Admin portal ───────────────────────────────────────── */}
         <Route path="/admin" element={<AdminGuard><AppLayout role="admin"><AdminDashboard /></AppLayout></AdminGuard>} />
         <Route path="/admin/cities" element={<AdminGuard><AppLayout role="admin"><AdminDashboard /></AppLayout></AdminGuard>} />
         <Route path="/admin/cities/:cityId" element={<AdminGuard><AppLayout role="admin"><CityManager /></AppLayout></AdminGuard>} />
         <Route path="/admin/cities/:cityId/sensors" element={<AdminGuard><AppLayout role="admin"><SensorManager /></AppLayout></AdminGuard>} />
         <Route path="/admin/clients" element={<AdminGuard><AppLayout role="admin"><ClientManager /></AppLayout></AdminGuard>} />
+        <Route path="/admin/issues" element={<AdminGuard><AppLayout role="admin"><IssueManager /></AppLayout></AdminGuard>} />
+        <Route path="/admin/resources" element={<AdminGuard><AppLayout role="admin"><ResourceAllocation /></AppLayout></AdminGuard>} />
         {/* Admin domain pages */}
         <Route path="/admin/mobility" element={<AdminGuard><AppLayout role="admin"><DetailedMobility /></AppLayout></AdminGuard>} />
         <Route path="/admin/environment" element={<AdminGuard><AppLayout role="admin"><DetailedEnvironment /></AppLayout></AdminGuard>} />
@@ -99,6 +110,9 @@ function App() {
         <Route path="/client/ranking" element={<ClientGuard><AppLayout role="client"><CityRanking /></AppLayout></ClientGuard>} />
         <Route path="/client/alerts" element={<ClientGuard><AppLayout role="client"><AlertsPanel /></AppLayout></ClientGuard>} />
         <Route path="/client/chat" element={<ClientGuard><AppLayout role="client"><ChatBot /></AppLayout></ClientGuard>} />
+        <Route path="/client/issues" element={<ClientGuard><AppLayout role="client"><ReportIssue /></AppLayout></ClientGuard>} />
+        <Route path="/client/subscriptions" element={<ClientGuard><AppLayout role="client"><AlertPreferences /></AppLayout></ClientGuard>} />
+        <Route path="/client/trip-simulator" element={<ClientGuard><AppLayout role="client"><TripSimulator /></AppLayout></ClientGuard>} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />

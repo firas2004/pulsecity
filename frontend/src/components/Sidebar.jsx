@@ -30,11 +30,18 @@ const Sidebar = ({ role = 'client' }) => {
     { to: `${basePath}/ranking`, icon: Icons.Trophy, label: 'Score & Classement' },
     { to: `${basePath}/alerts`, icon: Icons.Bell, label: 'Centre d\'Alertes' },
     { to: `${basePath}/chat`, icon: Icons.MessageSquare, label: 'Assistant IA' },
+    { to: `${basePath}/trip-simulator`, icon: Icons.MapPin, label: 'Simulateur de Trajet' },
+    ...(role === 'client' ? [
+      { to: '/client/issues', icon: Icons.Megaphone, label: 'Signaler un Problème' },
+      { to: '/client/subscriptions', icon: Icons.Bell, label: 'Mes Alertes' }
+    ] : []),
   ];
 
   const adminNavItems = [
     { to: '/admin/cities', icon: Icons.Building2, label: 'Gestion des Villes' },
     { to: '/admin/clients', icon: Icons.Users, label: 'Gestion des Clients' },
+    { to: '/admin/issues', icon: Icons.ClipboardList, label: 'Gestion des Signalements' },
+    { to: '/admin/resources', icon: Icons.BarChart3, label: 'Allocation de Ressources' },
   ];
 
   const handleLogout = () => {

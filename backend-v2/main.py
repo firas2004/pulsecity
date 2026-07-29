@@ -9,11 +9,14 @@ from models.database import Base, engine, SessionLocal
 from models.city import City, Sensor, ThresholdRule
 from models.user import User
 from models.chat import ChatConversation, ChatMessage
+from models.issue import IssueReport
+from models.subscription import AlertSubscription
+from models.preference import UserPreference
 from state import latest_metrics
 from agents.weather_agent import weather_agent
 
 # Import des routeurs
-from routers import auth, cities, sensors, metrics, alerts, chat
+from routers import auth, cities, sensors, metrics, alerts, chat, issues, subscriptions, preferences, reports, trip_simulator
 
 # Initialisation de la base de données
 Base.metadata.create_all(bind=engine)
@@ -40,6 +43,11 @@ app.include_router(sensors.router)
 app.include_router(metrics.router)
 app.include_router(alerts.router)
 app.include_router(chat.router)
+app.include_router(issues.router)
+app.include_router(subscriptions.router)
+app.include_router(preferences.router)
+app.include_router(reports.router)
+app.include_router(trip_simulator.router)
 
 @app.get("/")
 def read_root():
@@ -156,23 +164,23 @@ def seed_database():
         # 4. Créer toutes les villes tunisiennes si vides
         default_cities = [
             {"id": "tunis-centre", "name": "Tunis Centre",  "lat": 36.8065, "lon": 10.1815, "pop": 650000,  "desc": "Capitale — zone dense et administrative"},
-            {"id": "ariana",       "name": "Ariana",        "lat": 36.8665, "lon": 10.1930, "pop": 500000,  "desc": "Banlieue nord de Tunis, hub technologique"},
-            {"id": "ben-arous",    "name": "Ben Arous",     "lat": 36.7531, "lon": 10.2222, "pop": 600000,  "desc": "Zone industrielle et résidentielle au sud"},
-            {"id": "la-marsa",     "name": "La Marsa",      "lat": 36.8778, "lon": 10.3247, "pop": 90000,   "desc": "Ville côtière résidentielle et touristique"},
+            {"id": "ariana",       "name": "Ariana",        "lat": 36.8625, "lon": 10.1956, "pop": 500000,  "desc": "Banlieue nord de Tunis, hub technologique"},
+            {"id": "ben-arous",    "name": "Ben Arous",     "lat": 36.7545, "lon": 10.2189, "pop": 600000,  "desc": "Zone industrielle et résidentielle au sud"},
+            {"id": "la-marsa",     "name": "La Marsa",      "lat": 36.8781, "lon": 10.3247, "pop": 90000,   "desc": "Ville côtière résidentielle et touristique"},
             {"id": "sfax",         "name": "Sfax",          "lat": 34.7406, "lon": 10.7603, "pop": 330000,  "desc": "2ème ville de Tunisie, centre industriel et portuaire"},
-            {"id": "sousse",       "name": "Sousse",        "lat": 35.8256, "lon": 10.6369, "pop": 270000,  "desc": "Capitale du Sahel, pôle touristique et universitaire"},
-            {"id": "gabes",        "name": "Gabès",         "lat": 33.8826, "lon": 10.0979, "pop": 140000,  "desc": "Oasis côtière, pôle chimique et industriel"},
+            {"id": "sousse",       "name": "Sousse",        "lat": 35.8256, "lon": 10.6084, "pop": 270000,  "desc": "Capitale du Sahel, pôle touristique et universitaire"},
+            {"id": "gabes",        "name": "Gabès",         "lat": 33.8815, "lon": 10.0982, "pop": 140000,  "desc": "Oasis côtière, pôle chimique et industriel"},
             {"id": "bizerte",      "name": "Bizerte",       "lat": 37.2744, "lon": 9.8739,  "pop": 115000,  "desc": "Port stratégique au nord, zone industrielle"},
-            {"id": "kairouan",     "name": "Kairouan",      "lat": 35.6781, "lon": 10.0964, "pop": 120000,  "desc": "Ville sainte, patrimoine UNESCO, artisanat"},
-            {"id": "monastir",     "name": "Monastir",      "lat": 35.7693, "lon": 10.8113, "pop": 73000,   "desc": "Ville côtière, tourisme et aéroport international"},
+            {"id": "kairouan",     "name": "Kairouan",      "lat": 35.6781, "lon": 10.0963, "pop": 120000,  "desc": "Ville sainte, patrimoine UNESCO, artisanat"},
+            {"id": "monastir",     "name": "Monastir",      "lat": 35.7643, "lon": 10.8113, "pop": 73000,   "desc": "Ville côtière, tourisme et aéroport international"},
             {"id": "nabeul",       "name": "Nabeul",        "lat": 36.4561, "lon": 10.7376, "pop": 80000,   "desc": "Cap Bon — céramique, agriculture et tourisme"},
             {"id": "medenine",     "name": "Médenine",      "lat": 33.3549, "lon": 10.5055, "pop": 70000,   "desc": "Gouvernorat du sud, gateway vers Djerba"},
             {"id": "jendouba",     "name": "Jendouba",      "lat": 36.5011, "lon": 8.7803,  "pop": 45000,   "desc": "Nord-ouest montagneux, agriculture et forêts"},
             {"id": "gafsa",        "name": "Gafsa",         "lat": 34.4250, "lon": 8.7842,  "pop": 85000,   "desc": "Bassin minier, phosphates — région industrielle"},
             {"id": "mahdia",       "name": "Mahdia",        "lat": 35.5047, "lon": 11.0622, "pop": 45000,   "desc": "Péninsule côtière, tourisme balnéaire"},
             {"id": "tozeur",       "name": "Tozeur",        "lat": 33.9197, "lon": 8.1335,  "pop": 40000,   "desc": "Oasis saharienne, écotourisme et dattes"},
-            {"id": "beja",         "name": "Béja",          "lat": 36.7250, "lon": 9.1817,  "pop": 55000,   "desc": "Grenier à blé de la Tunisie, agriculture intensive"},
-            {"id": "siliana",      "name": "Siliana",       "lat": 36.0844, "lon": 9.3706,  "pop": 25000,   "desc": "Région intérieure, agriculture de montagne"},
+            {"id": "beja",         "name": "Béja",          "lat": 36.7256, "lon": 9.1817,  "pop": 55000,   "desc": "Grenier à blé de la Tunisie, agriculture intensive"},
+            {"id": "siliana",      "name": "Siliana",       "lat": 36.0844, "lon": 9.3708,  "pop": 25000,   "desc": "Région intérieure, agriculture de montagne"},
         ]
 
         # Default sensor specs — 12 types total

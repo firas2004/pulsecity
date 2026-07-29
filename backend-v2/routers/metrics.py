@@ -8,7 +8,49 @@ from models.user import User
 from routers.auth import get_current_user
 from state import latest_metrics, metrics_history
 
+from models.alert import Alert
+
 router = APIRouter(prefix="/metrics", tags=["metrics"])
+
+@router.get("/resource-allocation", response_model=List[dict])
+def get_resource_allocation(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    cities = db.query(City).all()
+    results = []
+
+    for city in cities:
+        active_alerts = db.query(Alert).filter(
+            Alert.city_id == city.id,
+            Alert.active == True
+        ).all()
+
+        crit_count = sum(1 for a in active_alerts if a.level == "Critical")
+        warn_count = sum(1 for a in active_alerts if a.level == "Warning")
+        score = (crit_count * 20) + (warn_count * 5)
+
+        # Identify worst metric for this city
+        worst = "traffic"
+        if active_alerts:
+            worst_alert = active_alerts[0]
+            worst = worst_alert.sensor_id.split("-")[1] if "-" in worst_alert.sensor_id else "général"
+
+        priority = "ÉLEVÉE (🔴 Intervention Requise)" if score >= 30 else "MOYENNE (🟡 Surveillance)" if score >= 10 else "FAIBLE (🟢 Stable)"
+
+        results.append({
+            "city_id": city.id,
+            "city_name": city.name,
+            "critical_alerts": crit_count,
+            "warning_alerts": warn_count,
+            "total_alerts": len(active_alerts),
+            "priority_score": score,
+            "worst_metric": worst,
+            "priority_level": priority
+        })
+
+    results.sort(key=lambda x: x["priority_score"], reverse=True)
+    return results
 
 @router.get("/{city_id}", response_model=dict)
 def get_latest_metrics(city_id: str, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):

@@ -146,6 +146,11 @@ const AlertsPanel = () => {
                     {alert.isolation_score && <span>• Score: {Number(alert.isolation_score).toFixed(3)}</span>}
                     <span>• {alert.timestamp ? new Date(alert.timestamp).toLocaleString('fr-FR') : 'Récent'}</span>
                   </div>
+                  {alert.suggested_action && (
+                    <div style={{ marginTop: '6px', fontSize: '12px', color: '#818CF8', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      💡 Action Suggérée : {alert.suggested_action}
+                    </div>
+                  )}
                 </div>
                 <AlertBadge level={level} />
               </div>
