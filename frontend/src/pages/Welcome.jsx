@@ -14,6 +14,7 @@ import TrustBar from '../components/welcome/TrustBar';
 import RoadmapTimeline from '../components/welcome/RoadmapTimeline';
 import FAQAccordion from '../components/welcome/FAQAccordion';
 import NewsletterSMS from '../components/welcome/NewsletterSMS';
+import TunisiaNetworkSection from '../components/welcome/TunisiaNetworkSection';
 
 // Animated counter hook
 const useCounter = (target, duration = 2000, started = false) => {
@@ -273,6 +274,9 @@ export default function Welcome() {
           titles={['Ariana','Béja','Ben Arous','Monastir','Sfax','Sousse','Tunis']}
         />
       </div>
+
+      {/* 🆕 FEATURE 10: Réseau de Surveillance — Villes Tunisiennes (Carte Leaflet) */}
+      <TunisiaNetworkSection />
 
       {/* 🆕 FEATURE 6: Trust Bar (Official Sources) */}
       <TrustBar />
