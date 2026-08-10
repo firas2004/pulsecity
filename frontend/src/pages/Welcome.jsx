@@ -4,6 +4,17 @@ import CitiesGallery from '../components/CitiesGallery';
 import { ThemeToggle } from '../theme';
 import '../styles/welcome.css';
 
+// ── New Features Components ───────────────────────────────────────────────────
+import HeroSearchBar from '../components/welcome/HeroSearchBar';
+import LiveActivityFeed from '../components/welcome/LiveActivityFeed';
+import MicroCityComparator from '../components/welcome/MicroCityComparator';
+import LivePreviewWidget from '../components/welcome/LivePreviewWidget';
+import UseCasesSection from '../components/welcome/UseCasesSection';
+import TrustBar from '../components/welcome/TrustBar';
+import RoadmapTimeline from '../components/welcome/RoadmapTimeline';
+import FAQAccordion from '../components/welcome/FAQAccordion';
+import NewsletterSMS from '../components/welcome/NewsletterSMS';
+
 // Animated counter hook
 const useCounter = (target, duration = 2000, started = false) => {
   const [count, setCount] = useState(0);
@@ -99,7 +110,6 @@ export default function Welcome() {
         ctx.fill();
       });
 
-      // Connect nearby particles with Vana electric line
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
           const dx = particles[i].x - particles[j].x;
@@ -161,7 +171,6 @@ export default function Welcome() {
 
       {/* ── HERO ── */}
       <section className="hero-section">
-        {/* Badge Live */}
         <div className="hero-badge-live">
           <span className="dot" />
           <span>PLATEFORME SMART CITY EN PRODUCTION · TUNISIE</span>
@@ -190,9 +199,15 @@ export default function Welcome() {
             En savoir plus ↓
           </a>
         </div>
+
+        {/* 🆕 FEATURE 1: Hero Search Bar (⌘K) */}
+        <HeroSearchBar />
       </section>
 
-      {/* ── STATS ── */}
+      {/* 🆕 FEATURE 2: Live Activity Feed (Ticker Terminal) */}
+      <LiveActivityFeed />
+
+      {/* ── STATS SECTION ── */}
       <section ref={statsRef} className="stats-section">
         <div className="stats-grid">
           {STATS.map((stat, i) => (
@@ -207,6 +222,9 @@ export default function Welcome() {
           ))}
         </div>
       </section>
+
+      {/* 🆕 FEATURE 3: Micro City Comparator */}
+      <MicroCityComparator />
 
       {/* ── FEATURES / PILLARS ── */}
       <section id="features" className="pillars-section">
@@ -239,6 +257,12 @@ export default function Welcome() {
         </div>
       </section>
 
+      {/* 🆕 FEATURE 4: Live Preview Widget (Mini Dashboard) */}
+      <LivePreviewWidget />
+
+      {/* 🆕 FEATURE 5: Use Cases Section (3 Personas) */}
+      <UseCasesSection />
+
       {/* ── CITIES GALLERY ── */}
       <div className="gallery-section">
         <div className="gallery-section-title">VILLES SURVEILLÉES EN TEMPS RÉEL</div>
@@ -250,7 +274,16 @@ export default function Welcome() {
         />
       </div>
 
-      {/* ── CTA FINAL ── */}
+      {/* 🆕 FEATURE 6: Trust Bar (Official Sources) */}
+      <TrustBar />
+
+      {/* 🆕 FEATURE 7: Roadmap Timeline */}
+      <RoadmapTimeline />
+
+      {/* 🆕 FEATURE 8: FAQ Accordion */}
+      <FAQAccordion />
+
+      {/* ── CTA FINAL & DEMO CREDENTIALS ── */}
       <section className="cta-section">
         <div className="cta-container">
           <h2 className="cta-title">
@@ -276,6 +309,9 @@ export default function Welcome() {
           </div>
         </div>
       </section>
+
+      {/* 🆕 FEATURE 9: Newsletter & SMS Alerts */}
+      <NewsletterSMS />
 
       {/* ── FOOTER ── */}
       <footer className="welcome-footer">
