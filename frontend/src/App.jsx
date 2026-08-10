@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
+import ChatBubble from './components/chat/ChatBubble';
 
 // Pages
 import Welcome from './pages/Welcome';
@@ -77,6 +78,7 @@ const AppLayout = ({ role = 'client', children }) => {
 function App() {
   return (
     <BrowserRouter>
+      <ChatBubble />
       <Routes>
         {/* Landing page */}
         <Route path="/" element={<Welcome />} />

@@ -16,7 +16,7 @@ from state import latest_metrics
 from agents.weather_agent import weather_agent
 
 # Import des routeurs
-from routers import auth, cities, sensors, metrics, alerts, chat, issues, subscriptions, preferences, reports, trip_simulator, health_finder, admin_finder, poi_finder, eco_pulse, stores_finder
+from routers import auth, cities, sensors, metrics, alerts, chat, issues, subscriptions, preferences, reports, trip_simulator, health_finder, admin_finder, poi_finder, eco_pulse, stores_finder, ai_chat
 
 # Initialisation de la base de données
 Base.metadata.create_all(bind=engine)
@@ -53,6 +53,7 @@ app.include_router(admin_finder.router)
 app.include_router(poi_finder.router)
 app.include_router(eco_pulse.router)
 app.include_router(stores_finder.router)
+app.include_router(ai_chat.router)
 
 @app.get("/")
 def read_root():
