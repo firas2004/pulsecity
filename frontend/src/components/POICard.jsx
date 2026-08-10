@@ -68,13 +68,19 @@ export default function POICard({ poi, isSelected = false, onClick, onNavigate, 
         {/* Photo */}
         <div style={{
           width: 72, height: 72, minWidth: 72, borderRadius: 12, overflow: 'hidden',
-          background: `url("${poi.photo_url}") center/cover`,
+          backgroundColor: '#1E293B',
           position: 'relative',
         }}>
+          <img
+            src={poi.photo_url || '/assests/Tunis.png'}
+            alt={poi.name}
+            onError={(e) => { e.currentTarget.src = '/assests/Tunis.png'; }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
           {poi.is_emblematic && (
             <div style={{
               position: 'absolute', bottom: 0, left: 0, right: 0,
-              background: 'linear-gradient(transparent, rgba(0,0,0,0.6))',
+              background: 'linear-gradient(transparent, rgba(0,0,0,0.75))',
               color: '#FFD700', fontSize: 9, fontWeight: 800, textAlign: 'center', padding: '4px 2px',
             }}>
               ⭐ Emblématique

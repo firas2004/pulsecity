@@ -79,7 +79,7 @@ export default function POIDetailDrawer({ poi, onClose, onNavigate, isFavorite =
           src={poi.photo_url}
           alt={poi.name}
           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          onError={ev => { ev.target.src = `https://source.unsplash.com/800x400/?tunisia`; }}
+          onError={ev => { ev.currentTarget.src = '/assests/Tunis.png'; }}
         />
         {/* Overlay gradient */}
         <div style={{

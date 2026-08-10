@@ -901,6 +901,53 @@ def _haversine_km(lat1, lng1, lat2, lng2) -> float:
     return R * 2 * atan2(sqrt(a), sqrt(1 - a))
 
 
+POI_IMAGE_MAP = {
+    "poi-medina-tunis": "/assests/medina_de_tunis.jpg",
+    "poi-cafe-sidi-chabaane": "/assests/cafe_sidi_chabaane.jpg",
+    "poi-sidi-bou-said": "/assests/village_de_sidi_bou_said.jpg",
+    "poi-carthage": "/assests/site_archeologique_de_carthage.jpg",
+    "poi-parc-belvedere": "/assests/Tunis.png",
+    "poi-cogite": "/assests/1.png",
+    "poi-musee-bardo": "/assests/musee_national_de_bardo.jpg",
+    "poi-souk-el-bey": "/assests/2.png",
+    "poi-plage-la-marsa": "/assests/3.png",
+    "poi-restaurant-dar-el-jeld": "/assests/4.jpg",
+    "poi-hammamet-medina": "/assests/medina_de_hammamet.jpg",
+    "poi-plage-hammamet": "/assests/plage_de_hammamet.jpg",
+    "poi-sousse-medina": "/assests/medina_de_sousse.jpg",
+    "poi-port-kantaoui": "/assests/sousse.png",
+    "poi-ribat-monastir": "/assests/ribat_de_monastir.jpg",
+    "poi-mausolee-bourguiba": "/assests/Monastir.jpg",
+    "poi-el-jem": "/assests/amphith%C3%A9%C3%A2tre_el_jem.jpg",
+    "poi-sfax-medina": "/assests/Sfax.jpg",
+    "poi-sfax-kasbah": "/assests/5.jpg",
+    "poi-kairouan-grande-mosquee": "/assests/grande_mosqu%C3%A9e_de_kairouan.jpg",
+    "poi-kairouan-patisserie": "/assests/6.jpg",
+    "poi-bizerte-vieux-port": "/assests/vieux_port_de_bizerte.jpg",
+    "poi-cap-blanc": "/assests/Cap_Blanc_Pointe_Nord_de_l'Afrique.jpg",
+    "poi-beja-citadelle": "/assests/Beja.jpg",
+    "poi-tabarka": "/assests/7.jpg",
+    "poi-ain-draham": "/assests/8.jpg",
+    "poi-le-kef-kasbah": "/assests/plateau_de_jugurtha.jpg",
+    "poi-zaghouan-nymphee": "/assests/site_archeologique_de_carthage.jpg",
+    "poi-jugurtha-tableland": "/assests/plateau_de_jugurtha.jpg",
+    "poi-sbeitla": "/assests/site_archeologique_de_carthage.jpg",
+    "poi-sidi-bouzid-place": "/assests/Tunis.png",
+    "poi-gabes-oasis": "/assests/Oasis_Maritime_de_Gab%C3%A8s.jpg",
+    "poi-djerba-houmt-souk": "/assests/Houmt_Souk_Djerba.jpg",
+    "poi-djerba-ghriba": "/assests/Synagogue_de_la_Ghriba.jpg",
+    "poi-ksar-hadada": "/assests/Ksar_Hadada.jpg",
+    "poi-matmata": "/assests/Maisons_Troglodytes_de_Matmata.jpg",
+    "poi-chenini-village": "/assests/Village_de_Ch%C3%A9nini.jpg",
+    "poi-piscines-romaines-gafsa": "/assests/site_archeologique_de_carthage.jpg",
+    "poi-tozeur-palmeraie": "/assests/Palmeraie_de_Tozeur.jpg",
+    "poi-chott-el-jerid": "/assests/Chott_El_J%C3%A9rid.jpg",
+    "poi-douz-porte-desert": "/assests/Douz_Porte_du_D%C3%A9sert.jpg",
+    "poi-ariana-galerie": "/assests/Ariana.jpg",
+    "poi-parc-zitoun": "/assests/Ben%20Arous.jpg",
+    "poi-manouba-cite-olympique": "/assests/Tunis.png",
+}
+
 def _enrich(poi: Dict, lat=None, lng=None) -> Dict:
     """Enrichit un POI avec calculs dynamiques."""
     enriched = dict(poi)
@@ -909,9 +956,14 @@ def _enrich(poi: Dict, lat=None, lng=None) -> Dict:
     enriched["category_color"] = cat.get("color", "#607D8B")
     enriched["category_display"] = cat.get("name", poi.get("category", ""))
 
-    # Photo placeholder Unsplash
-    query = poi.get("photo_query", poi.get("name", "tunisia"))
-    enriched["photo_url"] = f"https://source.unsplash.com/800x600/?{query.replace(' ', '+')}"
+    # Photo depuis le dossier /assests/
+    poi_id = poi.get("id", "")
+    if poi_id in POI_IMAGE_MAP:
+        enriched["photo_url"] = POI_IMAGE_MAP[poi_id]
+    elif poi.get("photo_url"):
+        enriched["photo_url"] = poi["photo_url"]
+    else:
+        enriched["photo_url"] = "/assests/Tunis.png"
 
     # Distance
     if lat is not None and lng is not None:
