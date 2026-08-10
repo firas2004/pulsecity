@@ -148,7 +148,7 @@ export default function TunisiaNetworkSection() {
         fontFamily: 'var(--font-primary, "Inter", sans-serif)',
       }}
     >
-      {/* Dynamic Keyframe for Pulsing Markers */}
+      {/* Dark Map Styles & Pulsing Animations */}
       <style>{`
         @keyframes pulseMarker {
           0% { transform: scale(0.9); opacity: 0.8; }
@@ -158,6 +158,16 @@ export default function TunisiaNetworkSection() {
         .custom-city-marker {
           background: none !important;
           border: none !important;
+        }
+        .leaflet-container {
+          background: #0A0A0F !important;
+          font-family: var(--font-primary, sans-serif) !important;
+        }
+        .leaflet-tile-pane {
+          background: #0A0A0F !important;
+        }
+        .leaflet-tile {
+          filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) !important;
         }
         .leaflet-popup-content-wrapper {
           background: #12121A !important;
@@ -428,10 +438,10 @@ export default function TunisiaNetworkSection() {
             style={{ width: '100%', height: '100%', borderRadius: 0, background: '#0A0A0F' }}
             zoomControl={true}
           >
-            {/* CartoDB Dark Tile Layer */}
+            {/* OpenStreetMap Tile Layer with Dark Filter & CartoDB Fallback */}
             <TileLayer
-              url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               maxZoom={18}
             />
 
