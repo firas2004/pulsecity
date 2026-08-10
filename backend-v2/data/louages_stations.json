@@ -1,0 +1,86 @@
+[
+  {
+    "id": "bab-saadoun",
+    "name": "Station de Louage Bab Saadoun",
+    "lat": 36.8095,
+    "lng": 10.1645,
+    "type": "louage",
+    "color": "red",
+    "zone": "nord",
+    "city": "Tunis",
+    "destinations": ["Bizerte", "Jendouba", "Tabarka", "Béja", "Le Kef", "Siliana"],
+    "description": "Louages vers le Nord et Nord-Ouest de la Tunisie"
+  },
+  {
+    "id": "moncef-bey",
+    "name": "Station Moncef Bey",
+    "lat": 36.7985,
+    "lng": 10.1815,
+    "type": "louage",
+    "color": "red",
+    "zone": "centre-sud",
+    "city": "Tunis",
+    "destinations": ["Sousse", "Monastir", "Kairouan", "Sfax", "Gabès", "El Jem", "Mahdia"],
+    "description": "Louages vers le Centre et le Sud de la Tunisie"
+  },
+  {
+    "id": "bab-alioua",
+    "name": "Station Bab Alioua",
+    "lat": 36.7895,
+    "lng": 10.1815,
+    "type": "louage",
+    "color": "red",
+    "zone": "cap-bon",
+    "city": "Tunis",
+    "destinations": ["Nabeul", "Hammamet", "Kelibia", "Zaghouan", "Grombalia"],
+    "description": "Louages vers le Cap Bon et Zaghouan"
+  },
+  {
+    "id": "sousse-louage",
+    "name": "Station de Louage Sousse",
+    "lat": 35.8256,
+    "lng": 10.6084,
+    "type": "louage",
+    "color": "red",
+    "zone": "sahel",
+    "city": "Sousse",
+    "destinations": ["Monastir", "Kairouan", "Sfax", "Mahdia", "Tunis", "El Jem"],
+    "description": "Hub régional Sahel — correspondances vers Monastir et Sfax"
+  },
+  {
+    "id": "sfax-louage",
+    "name": "Station de Louage Sfax",
+    "lat": 34.7406,
+    "lng": 10.7603,
+    "type": "louage",
+    "color": "red",
+    "zone": "sud-nord",
+    "city": "Sfax",
+    "destinations": ["Gabès", "Gafsa", "Sousse", "Tunis", "Médenine", "Tataouine"],
+    "description": "Hub du Sud — porte vers Gabès et le Grand Sud"
+  },
+  {
+    "id": "gabes-louage",
+    "name": "Station de Louage Gabès",
+    "lat": 33.8815,
+    "lng": 10.0982,
+    "type": "louage",
+    "color": "red",
+    "zone": "grand-sud",
+    "city": "Gabès",
+    "destinations": ["Sfax", "Médenine", "Tataouine", "Gafsa", "Tozeur", "Zarzis"],
+    "description": "Porte du Grand Sud tunisien"
+  },
+  {
+    "id": "kairouan-louage",
+    "name": "Station de Louage Kairouan",
+    "lat": 35.6781,
+    "lng": 10.0963,
+    "type": "louage",
+    "color": "red",
+    "zone": "centre",
+    "city": "Kairouan",
+    "destinations": ["Sousse", "Sfax", "Tunis", "Sidi Bouzid", "Gafsa"],
+    "description": "Centre géographique de la Tunisie"
+  }
+]

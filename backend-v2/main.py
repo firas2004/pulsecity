@@ -16,7 +16,7 @@ from state import latest_metrics
 from agents.weather_agent import weather_agent
 
 # Import des routeurs
-from routers import auth, cities, sensors, metrics, alerts, chat, issues, subscriptions, preferences, reports, trip_simulator
+from routers import auth, cities, sensors, metrics, alerts, chat, issues, subscriptions, preferences, reports, trip_simulator, health_finder, admin_finder, poi_finder, eco_pulse, stores_finder
 
 # Initialisation de la base de données
 Base.metadata.create_all(bind=engine)
@@ -48,6 +48,11 @@ app.include_router(subscriptions.router)
 app.include_router(preferences.router)
 app.include_router(reports.router)
 app.include_router(trip_simulator.router)
+app.include_router(health_finder.router)
+app.include_router(admin_finder.router)
+app.include_router(poi_finder.router)
+app.include_router(eco_pulse.router)
+app.include_router(stores_finder.router)
 
 @app.get("/")
 def read_root():
@@ -85,6 +90,9 @@ def migrate_database():
     """Ajoute les nouvelles colonnes si elles n'existent pas (migration manuelle SQLite)."""
     import sqlite3
     db_path = settings.DATABASE_URL.replace("sqlite:////", "/").replace("sqlite:///", "")
+    # S'assurer que le répertoire parent existe (ex: /app/dbdata/)
+    import os as _os
+    _os.makedirs(_os.path.dirname(db_path), exist_ok=True)
     try:
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()

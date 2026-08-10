@@ -1,0 +1,137 @@
+[
+  {
+    "id": "gare-tunis",
+    "name": "Gare de Tunis",
+    "lat": 36.7991,
+    "lng": 10.1819,
+    "type": "rfr",
+    "lines": ["D", "E", "Train SNCFT"],
+    "description": "Hub ferroviaire principal — RFR D, E + Grandes Lignes SNCFT"
+  },
+  {
+    "id": "saida-manoubia",
+    "name": "Saïda Manoubia",
+    "lat": 36.7970,
+    "lng": 10.1620,
+    "type": "rfr",
+    "lines": ["E"],
+    "description": "RFR Ligne E — vers Sidi Hassine"
+  },
+  {
+    "id": "ennajah",
+    "name": "Ennajah",
+    "lat": 36.7940,
+    "lng": 10.1480,
+    "type": "rfr",
+    "lines": ["E"],
+    "description": "RFR Ligne E"
+  },
+  {
+    "id": "ettayaran",
+    "name": "Ettayaran-Ezzouhour 1",
+    "lat": 36.7900,
+    "lng": 10.1360,
+    "type": "rfr",
+    "lines": ["E"],
+    "description": "RFR Ligne E"
+  },
+  {
+    "id": "ezzouhour2",
+    "name": "Ezzouhour 2",
+    "lat": 36.7860,
+    "lng": 10.1240,
+    "type": "rfr",
+    "lines": ["E"],
+    "description": "RFR Ligne E"
+  },
+  {
+    "id": "el-hrairia",
+    "name": "El Hraïria",
+    "lat": 36.7820,
+    "lng": 10.1160,
+    "type": "rfr",
+    "lines": ["E"],
+    "description": "RFR Ligne E"
+  },
+  {
+    "id": "bougatfa",
+    "name": "Bougatfa-Sidi Hassine",
+    "lat": 36.7780,
+    "lng": 10.1020,
+    "type": "rfr",
+    "lines": ["E"],
+    "description": "RFR Ligne E — terminus Sidi Hassine (mise en service mars 2023)"
+  },
+  {
+    "id": "mellassine",
+    "name": "Mellassine",
+    "lat": 36.8010,
+    "lng": 10.1680,
+    "type": "rfr",
+    "lines": ["D"],
+    "description": "RFR Ligne D — vers Gobâa"
+  },
+  {
+    "id": "raoudha",
+    "name": "Raoudha",
+    "lat": 36.8030,
+    "lng": 10.1540,
+    "type": "rfr",
+    "lines": ["D"],
+    "description": "RFR Ligne D"
+  },
+  {
+    "id": "bardo-rfr",
+    "name": "Le Bardo",
+    "lat": 36.8095,
+    "lng": 10.1345,
+    "type": "rfr",
+    "lines": ["D"],
+    "description": "RFR Ligne D — correspondance Métro L4"
+  },
+  {
+    "id": "bortal",
+    "name": "Bortal",
+    "lat": 36.8085,
+    "lng": 10.1180,
+    "type": "rfr",
+    "lines": ["D"],
+    "description": "RFR Ligne D"
+  },
+  {
+    "id": "manouba-rfr",
+    "name": "Manouba",
+    "lat": 36.8085,
+    "lng": 10.1015,
+    "type": "rfr",
+    "lines": ["D"],
+    "description": "RFR Ligne D — dessert Manouba"
+  },
+  {
+    "id": "el-bortokal",
+    "name": "El-Bortokal",
+    "lat": 36.8060,
+    "lng": 10.0840,
+    "type": "rfr",
+    "lines": ["D"],
+    "description": "RFR Ligne D"
+  },
+  {
+    "id": "gobaa1",
+    "name": "Gobâa 1",
+    "lat": 36.8050,
+    "lng": 10.0730,
+    "type": "rfr",
+    "lines": ["D"],
+    "description": "RFR Ligne D"
+  },
+  {
+    "id": "gobaa2",
+    "name": "Gobâa 2",
+    "lat": 36.8038,
+    "lng": 10.0650,
+    "type": "rfr",
+    "lines": ["D"],
+    "description": "RFR Ligne D — terminus Gobâa (mise en service janvier 2025)"
+  }
+]

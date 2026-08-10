@@ -15,7 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Variables d'environnement avec valeurs par défaut
-ENV DATABASE_URL="sqlite:////app/data/pulsecity.db"
+ENV DATABASE_URL="sqlite:////app/dbdata/pulsecity.db"
 ENV JWT_SECRET="pulsecity-v2-super-secret-key-123456789-abcdef"
 ENV KAFKA_BROKER="kafka.kafka.svc.cluster.local:9092"
 ENV ANOMALY_DETECTOR_URL="http://anomaly-detector.default.svc.cluster.local:8000"

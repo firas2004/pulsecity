@@ -1,0 +1,6 @@
+[
+  {"id":"promo-carrefour-ete-2026","store_chain":"carrefour","title":"Promotions Été 2026","description":"Jusqu'à -50% sur les produits frais et les boissons","start_date":"2026-07-01","end_date":"2026-08-31","catalogue_url":"https://www.carrefour.tn/promotions","categories":["alimentation","boissons","hygiène"],"is_active":true,"discount_max":50},
+  {"id":"promo-mg-rentree-2026","store_chain":"mg","title":"Rentrée Scolaire 2026","description":"Fournitures et équipements à prix réduits","start_date":"2026-08-15","end_date":"2026-09-15","catalogue_url":"https://www.mg.tn/promotions","categories":["scolaire","électronique"],"is_active":true,"discount_max":30},
+  {"id":"promo-monoprix-bio-2026","store_chain":"monoprix","title":"Semaine du Bio","description":"Produits biologiques et naturels en promotion","start_date":"2026-08-01","end_date":"2026-08-15","catalogue_url":"https://www.monoprix.tn/promotions","categories":["bio","alimentation"],"is_active":true,"discount_max":25},
+  {"id":"promo-aziza-ramadan-2026","store_chain":"aziza","title":"Promo Produits Locaux","description":"Soutien aux producteurs tunisiens — prix direct producteur","start_date":"2026-08-01","end_date":"2026-09-30","catalogue_url":"https://www.aziza.tn/promotions","categories":["alimentation","local"],"is_active":true,"discount_max":20}
+]

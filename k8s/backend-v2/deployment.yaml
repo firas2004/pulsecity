@@ -80,7 +80,7 @@ spec:
 
           env:
             - name: DATABASE_URL
-              value: "sqlite:////app/data/pulsecity.db"
+              value: "sqlite:////app/dbdata/pulsecity.db"
             - name: JWT_SECRET
               value: "change-me"
             - name: KAFKA_BROKER
@@ -133,7 +133,7 @@ spec:
           # Volumes temporaires pour l'écriture de SQLite et des fichiers temporaires
           volumeMounts:
             - name: db-data
-              mountPath: /app/data
+              mountPath: /app/dbdata
             - name: tmp-dir
               mountPath: /tmp
 

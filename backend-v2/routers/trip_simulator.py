@@ -2,10 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from models.database import get_db
 from models.city import City
-from helpers.distance import haversine_km, estimated_road_distance_km
+from helpers.routing_engine import get_road_route
 from helpers.fare_calculator import calculate_all_modes
+from helpers.transport_data import get_nearby_stations
 
 router = APIRouter(prefix="/trip-simulator", tags=["trip-simulator"])
+
 
 @router.get("/calculate")
 def calculate_trip(
@@ -25,14 +27,35 @@ def calculate_trip(
         raise HTTPException(status_code=404, detail=f"Ville d'arrivée non trouvée: {dest_id}")
 
     if orig_id == dest_id:
-        distance_km = 0.0
+        route = {"distance_km": 0.0, "duration_min": 0, "geometry": [[origin_city.latitude, origin_city.longitude]], "source": "same_point"}
     else:
-        distance_km = estimated_road_distance_km(
+        route = get_road_route(
             origin_city.latitude, origin_city.longitude,
             dest_city.latitude, dest_city.longitude
         )
 
+    distance_km = route["distance_km"]
+    duration_min = route["duration_min"]
+    geometry = route["geometry"]
+    route_source = route["source"]
+
     modes = calculate_all_modes(orig_id, dest_id, distance_km)
+
+    # Nearby stations for origin and destination (radius 10km)
+    origin_nearby = get_nearby_stations(
+        origin_city.latitude, origin_city.longitude,
+        radius_km=10.0, max_results=5
+    )
+    dest_nearby = get_nearby_stations(
+        dest_city.latitude, dest_city.longitude,
+        radius_km=10.0, max_results=5
+    )
+
+    distance_note = (
+        "Distance et durée calculées via OSRM (routage routier réel)"
+        if route_source == "osrm"
+        else "Estimation basée sur la distance à vol d'oiseau ×1.3 (approximation route) — non basé sur un routage réel"
+    )
 
     return {
         "origin": {
@@ -48,6 +71,20 @@ def calculate_trip(
             "longitude": dest_city.longitude
         },
         "distance_km": distance_km,
-        "distance_note": "Estimation basée sur la distance à vol d'oiseau x1.3 (approximation route) — non basé sur un routage réel",
-        "modes": modes
+        "duration_min": duration_min,
+        "route_geometry": geometry,
+        "route_source": route_source,
+        "distance_note": distance_note,
+        "modes": modes,
+        "stations_nearby": {
+            "origin": origin_nearby,
+            "destination": dest_nearby,
+        }
     }
+
+
+@router.get("/infrastructure")
+def get_infrastructure():
+    """Returns all transport infrastructure points for map rendering."""
+    from helpers.transport_data import get_all_stations
+    return {"stations": get_all_stations()}

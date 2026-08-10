@@ -1,0 +1,89 @@
+[
+  {
+    "line": "L1",
+    "name": "Ligne 1 — Place de Barcelone ↔ Ben Arous",
+    "color": "#0055A4",
+    "length_km": 6,
+    "stations": [
+      { "id": "barcelone-l1", "name": "Place de Barcelone", "lat": 36.7990, "lng": 10.1825, "interchange": ["L4", "L5", "Train SNCFT"] },
+      { "id": "bab-jedid", "name": "Bab Jedid", "lat": 36.7960, "lng": 10.1850 },
+      { "id": "passage", "name": "Passage", "lat": 36.7930, "lng": 10.1875 },
+      { "id": "bab-el-khadra", "name": "Bab El Khadra", "lat": 36.7900, "lng": 10.1900 },
+      { "id": "montplaisir", "name": "Montplaisir", "lat": 36.7860, "lng": 10.1920 },
+      { "id": "cite-sportive", "name": "Cité Sportive", "lat": 36.7820, "lng": 10.1940 },
+      { "id": "ibn-khaldoun-l1", "name": "Ibn Khaldoun", "lat": 36.7780, "lng": 10.1960 },
+      { "id": "el-menzah", "name": "El Menzah", "lat": 36.7740, "lng": 10.1980 },
+      { "id": "jaafar", "name": "Jaafar", "lat": 36.7700, "lng": 10.2000 },
+      { "id": "mourouj-l1", "name": "El Mourouj", "lat": 36.7660, "lng": 10.2020 },
+      { "id": "ben-arous", "name": "Ben Arous", "lat": 36.7545, "lng": 10.2189 }
+    ]
+  },
+  {
+    "line": "L2",
+    "name": "Ligne 2 — Place de la République ↔ Ariana",
+    "color": "#0066CC",
+    "length_km": 6.2,
+    "stations": [
+      { "id": "republique", "name": "Place de la République", "lat": 36.8015, "lng": 10.1800, "interchange": ["L4", "L5"] },
+      { "id": "africa", "name": "Africa", "lat": 36.8060, "lng": 10.1820 },
+      { "id": "le-kram", "name": "Le Kram", "lat": 36.8100, "lng": 10.1840 },
+      { "id": "ain-zaghouan", "name": "Aïn Zaghouan", "lat": 36.8160, "lng": 10.1870 },
+      { "id": "cite-ibn-sina", "name": "Cité Ibn Sina", "lat": 36.8220, "lng": 10.1900 },
+      { "id": "ennasim", "name": "Ennasim", "lat": 36.8300, "lng": 10.1930 },
+      { "id": "ariana-centre", "name": "Ariana Centre", "lat": 36.8400, "lng": 10.1960 },
+      { "id": "ariana-l2", "name": "Ariana", "lat": 36.8625, "lng": 10.1956 }
+    ]
+  },
+  {
+    "line": "L3",
+    "name": "Ligne 3 — Tunis Marine ↔ Ibn Khaldoun",
+    "color": "#003399",
+    "length_km": 6.5,
+    "stations": [
+      { "id": "tunis-marine", "name": "Tunis Marine", "lat": 36.8020, "lng": 10.1790, "interchange": ["L6", "TGM"] },
+      { "id": "bab-saadoun-metro", "name": "Bab Saadoun", "lat": 36.8060, "lng": 10.1700, "interchange": ["L4", "L5"] },
+      { "id": "bab-alioua-metro", "name": "Bab Alioua", "lat": 36.7950, "lng": 10.1850 },
+      { "id": "ibn-khaldoun-l3", "name": "Ibn Khaldoun", "lat": 36.7910, "lng": 10.1900 }
+    ]
+  },
+  {
+    "line": "L4",
+    "name": "Ligne 4 — Place de Barcelone ↔ Kheireddine",
+    "color": "#0044BB",
+    "length_km": 10,
+    "stations": [
+      { "id": "barcelone-l4", "name": "Place de Barcelone", "lat": 36.7990, "lng": 10.1825, "interchange": ["L1", "L5", "Train"] },
+      { "id": "bab-saadoun-l4", "name": "Bab Saadoun", "lat": 36.8060, "lng": 10.1700, "interchange": ["L3", "L5"] },
+      { "id": "cite-des-sciences", "name": "Cité des Sciences", "lat": 36.8120, "lng": 10.1600 },
+      { "id": "bardo-l4", "name": "Le Bardo", "lat": 36.8095, "lng": 10.1345 },
+      { "id": "kheireddine", "name": "Kheireddine", "lat": 36.8080, "lng": 10.1200 }
+    ]
+  },
+  {
+    "line": "L5",
+    "name": "Ligne 5 — Place de Barcelone ↔ Intilaka",
+    "color": "#0033AA",
+    "length_km": 7.1,
+    "stations": [
+      { "id": "barcelone-l5", "name": "Place de Barcelone", "lat": 36.7990, "lng": 10.1825, "interchange": ["L1", "L4", "Train"] },
+      { "id": "bab-saadoun-l5", "name": "Bab Saadoun", "lat": 36.8060, "lng": 10.1700 },
+      { "id": "el-ouardia", "name": "El Ouardia", "lat": 36.8000, "lng": 10.1600 },
+      { "id": "el-mnar", "name": "El Mnar", "lat": 36.7950, "lng": 10.1500 },
+      { "id": "intilaka", "name": "Intilaka", "lat": 36.7900, "lng": 10.1400 }
+    ]
+  },
+  {
+    "line": "L6",
+    "name": "Ligne 6 — Tunis Marine ↔ El Mourouj 4",
+    "color": "#002288",
+    "length_km": 9.5,
+    "stations": [
+      { "id": "tunis-marine-l6", "name": "Tunis Marine", "lat": 36.8020, "lng": 10.1790, "interchange": ["L3", "TGM"] },
+      { "id": "el-aouina-metro", "name": "El Aouina", "lat": 36.7980, "lng": 10.1750 },
+      { "id": "el-mourouj1", "name": "El Mourouj 1", "lat": 36.7800, "lng": 10.1900 },
+      { "id": "el-mourouj2", "name": "El Mourouj 2", "lat": 36.7730, "lng": 10.1950 },
+      { "id": "el-mourouj3", "name": "El Mourouj 3", "lat": 36.7660, "lng": 10.2000 },
+      { "id": "el-mourouj4", "name": "El Mourouj 4", "lat": 36.7590, "lng": 10.2050 }
+    ]
+  }
+]

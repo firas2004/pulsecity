@@ -24,6 +24,11 @@ import ReportIssue from './pages/client/ReportIssue';
 import AlertPreferences from './pages/client/AlertPreferences';
 import PublicBeachView from './pages/PublicBeachView';
 import TripSimulator from './pages/client/TripSimulator';
+import HealthFinder from './pages/client/HealthFinder';
+import AdminFinder from './pages/client/AdminFinder';
+import POIFinder from './pages/client/POIFinder';
+import EcoPulse from './pages/client/EcoPulse';
+import StoresFinder from './pages/client/StoresFinder';
 
 // JWT Decoder
 export const decodeToken = (token) => {
@@ -113,6 +118,16 @@ function App() {
         <Route path="/client/issues" element={<ClientGuard><AppLayout role="client"><ReportIssue /></AppLayout></ClientGuard>} />
         <Route path="/client/subscriptions" element={<ClientGuard><AppLayout role="client"><AlertPreferences /></AppLayout></ClientGuard>} />
         <Route path="/client/trip-simulator" element={<ClientGuard><AppLayout role="client"><TripSimulator /></AppLayout></ClientGuard>} />
+        <Route path="/client/sante" element={<ClientGuard><AppLayout role="client"><HealthFinder /></AppLayout></ClientGuard>} />
+        <Route path="/admin/sante" element={<AdminGuard><AppLayout role="admin"><HealthFinder /></AppLayout></AdminGuard>} />
+        <Route path="/client/administrations" element={<ClientGuard><AppLayout role="client"><AdminFinder /></AppLayout></ClientGuard>} />
+        <Route path="/admin/administrations" element={<AdminGuard><AppLayout role="admin"><AdminFinder /></AppLayout></AdminGuard>} />
+        <Route path="/client/local" element={<ClientGuard><AppLayout role="client"><POIFinder /></AppLayout></ClientGuard>} />
+        <Route path="/admin/local" element={<AdminGuard><AppLayout role="admin"><POIFinder /></AppLayout></AdminGuard>} />
+        <Route path="/client/eco" element={<ClientGuard><AppLayout role="client"><EcoPulse /></AppLayout></ClientGuard>} />
+        <Route path="/admin/eco" element={<AdminGuard><AppLayout role="admin"><EcoPulse /></AppLayout></AdminGuard>} />
+        <Route path="/client/magasins" element={<ClientGuard><AppLayout role="client"><StoresFinder /></AppLayout></ClientGuard>} />
+        <Route path="/admin/magasins" element={<AdminGuard><AppLayout role="admin"><StoresFinder /></AppLayout></AdminGuard>} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />

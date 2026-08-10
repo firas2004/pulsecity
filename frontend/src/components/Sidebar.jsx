@@ -31,6 +31,11 @@ const Sidebar = ({ role = 'client' }) => {
     { to: `${basePath}/alerts`, icon: Icons.Bell, label: 'Centre d\'Alertes' },
     { to: `${basePath}/chat`, icon: Icons.MessageSquare, label: 'Assistant IA' },
     { to: `${basePath}/trip-simulator`, icon: Icons.MapPin, label: 'Simulateur de Trajet' },
+    { to: `${basePath}/sante`, icon: Icons.HeartPulse, label: ' Santé & Établissements' },
+    { to: `${basePath}/administrations`, icon: Icons.Landmark, label: ' Administrations' },
+    { to: `${basePath}/local`, icon: Icons.MapPinned, label: ' Pulse Local' },
+    { to: `${basePath}/eco`, icon: Icons.TrendingUp, label: ' Éco Pulse' },
+    { to: `${basePath}/magasins`, icon: Icons.ShoppingCart, label: ' Magasins' },
     ...(role === 'client' ? [
       { to: '/client/issues', icon: Icons.Megaphone, label: 'Signaler un Problème' },
       { to: '/client/subscriptions', icon: Icons.Bell, label: 'Mes Alertes' }
@@ -78,8 +83,8 @@ const Sidebar = ({ role = 'client' }) => {
             width: '36px',
             height: '36px',
             borderRadius: '10px',
-            background: role === 'admin' 
-              ? 'linear-gradient(135deg,#3B82F6,#6366F1)' 
+            background: role === 'admin'
+              ? 'linear-gradient(135deg,#3B82F6,#6366F1)'
               : 'linear-gradient(135deg,#10B981,#0EA5E9)',
             display: 'flex',
             alignItems: 'center',
@@ -189,9 +194,9 @@ const Sidebar = ({ role = 'client' }) => {
                 textDecoration: 'none',
                 fontSize: '14px',
                 fontWeight: isActive ? '600' : '500',
-                background: isActive 
-                  ? role === 'admin' 
-                    ? 'linear-gradient(135deg,#3B82F6,#6366F1)' 
+                background: isActive
+                  ? role === 'admin'
+                    ? 'linear-gradient(135deg,#3B82F6,#6366F1)'
                     : 'linear-gradient(135deg,#10B981,#3B82F6)'
                   : 'transparent',
                 boxShadow: isActive ? '0 6px 16px rgba(59,130,246,0.25)' : 'none',

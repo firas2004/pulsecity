@@ -1,0 +1,14 @@
+[
+  { "id": "tunis-marine-tgm", "name": "Tunis Marine", "lat": 36.8020, "lng": 10.1790, "order": 1, "interchange": ["Métro L3", "Métro L6"] },
+  { "id": "le-borgel", "name": "Le Borgel", "lat": 36.8120, "lng": 10.1980, "order": 2 },
+  { "id": "cherguia", "name": "Cherguia", "lat": 36.8200, "lng": 10.2100, "order": 3 },
+  { "id": "aviation-civile", "name": "Aviation Civile", "lat": 36.8290, "lng": 10.2190, "order": 4 },
+  { "id": "aviation", "name": "Aviation", "lat": 36.8370, "lng": 10.2240, "order": 5 },
+  { "id": "el-aouina-tgm", "name": "El Aouina", "lat": 36.8440, "lng": 10.2270, "order": 6 },
+  { "id": "chott-bahira", "name": "Chott Bahira", "lat": 36.8520, "lng": 10.2350, "order": 7 },
+  { "id": "sidi-daoud", "name": "Sidi Daoud", "lat": 36.8600, "lng": 10.2500, "order": 8 },
+  { "id": "consulat-angleterre", "name": "Consulat d'Angleterre", "lat": 36.8640, "lng": 10.2640, "order": 9 },
+  { "id": "la-marsa-ville", "name": "La Marsa Ville", "lat": 36.8720, "lng": 10.3100, "order": 10 },
+  { "id": "marsa-residence", "name": "Marsa Résidence", "lat": 36.8750, "lng": 10.3180, "order": 11 },
+  { "id": "marsa-plage", "name": "Marsa Plage", "lat": 36.8781, "lng": 10.3247, "order": 12 }
+]
