@@ -47,6 +47,11 @@ pipeline {
             defaultValue: 'pulsecity-raw',
             description: 'Dépôt Nexus hébergé pour stocker les artefacts'
         )
+        password(
+            name: 'DOCKERHUB_TOKEN',
+            defaultValue: '',
+            description: 'Token Docker Hub dckr_pat_... (Optionnel si mis à jour dans Jenkins)'
+        )
     }
 
     environment {
@@ -268,29 +273,37 @@ pipeline {
                 echo "🚀 [8/10] Authentification et Push des images vers Docker Hub..."
                 withCredentials([usernamePassword(credentialsId: env.DOCKERHUB_CREDS_ID, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_TOKEN')]) {
                     powershell '''
-                        Write-Host "Connexion à Docker Hub..." -ForegroundColor Cyan
-                        $env:DOCKER_TOKEN | docker login -u $env:DOCKER_USER --password-stdin
+                        $user = "${env:DOCKERHUB_REPO}"
+                        $token = "${params.DOCKERHUB_TOKEN}"
+                        if (-not $token) { $token = "${env:DOCKER_TOKEN}" }
+
+                        Write-Host "Connexion à Docker Hub en tant que $user..." -ForegroundColor Cyan
+                        $token | docker login -u $user --password-stdin
 
                         $service = "${env:SERVICE}"
                         $repo = "${env:DOCKERHUB_REPO}"
                         $tag = "${env:IMAGE_TAG}"
 
                         if ($service -eq "all" -or $service -eq "backend-v2") {
+                            Write-Host "Push pulsecity-backend..." -ForegroundColor Cyan
                             docker push "$repo/pulsecity-backend:$tag"
                             docker push "$repo/pulsecity-backend:latest"
                         }
 
                         if ($service -eq "all" -or $service -eq "frontend") {
+                            Write-Host "Push pulsecity-frontend..." -ForegroundColor Cyan
                             docker push "$repo/pulsecity-frontend:$tag"
                             docker push "$repo/pulsecity-frontend:latest"
                         }
 
                         if ($service -eq "all" -or $service -eq "iot-simulator") {
+                            Write-Host "Push pulsecity-sensor..." -ForegroundColor Cyan
                             docker push "$repo/pulsecity-sensor:$tag"
                             docker push "$repo/pulsecity-sensor:latest"
                         }
 
                         if ($service -eq "all" -or $service -eq "anomaly-detector") {
+                            Write-Host "Push pulsecity-anomaly-detector..." -ForegroundColor Cyan
                             docker push "$repo/pulsecity-anomaly-detector:$tag"
                             docker push "$repo/pulsecity-anomaly-detector:latest"
                         }
