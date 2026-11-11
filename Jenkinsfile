@@ -52,6 +52,11 @@ pipeline {
             defaultValue: '',
             description: 'Token Docker Hub dckr_pat_... (Optionnel si mis à jour dans Jenkins)'
         )
+        password(
+            name: 'AWS_SESSION_TOKEN',
+            defaultValue: '',
+            description: 'Token de session AWS temporaire (Optionnel, requis si clé ASIA... / AWS Academy)'
+        )
     }
 
     environment {
@@ -326,12 +331,24 @@ pipeline {
                 ]]) {
                     powershell '''
                         $env:AWS_DEFAULT_REGION = "${params.AWS_REGION}"
+                        if ("${params.AWS_SESSION_TOKEN}") {
+                            $env:AWS_SESSION_TOKEN = "${params.AWS_SESSION_TOKEN}"
+                        }
+
                         Write-Host "Interrogation de AWS STS..." -ForegroundColor Cyan
-                        try {
-                            & aws sts get-caller-identity
-                            Write-Host "✅ Identité AWS confirmée." -ForegroundColor Green
-                        } catch {
-                            Write-Host "AWS STS non disponible avec les clés actuelles : $($_.Exception.Message)" -ForegroundColor Yellow
+                        $identity = & aws sts get-caller-identity 2>&1
+                        if ($LASTEXITCODE -eq 0) {
+                            Write-Host $identity
+                            Write-Host "✅ Identité AWS confirmée avec succès." -ForegroundColor Green
+                        } else {
+                            Write-Host "⚠️ Attention: Le token AWS STS temporaire a expiré ou nécessite un rafraîchissement." -ForegroundColor Yellow
+                            Write-Host $identity
+                            if ("${params.DEPLOY_TO_EKS}" -eq "false") {
+                                Write-Host "Déploiement EKS désactivé (DEPLOY_TO_EKS=false) : étape non bloquante." -ForegroundColor Yellow
+                                $global:LASTEXITCODE = 0
+                            } else {
+                                Write-Error "Veuillez rafraîchir vos identifiants AWS temporaires (AWS Details > AWS CLI) pour autoriser le déploiement sur EKS."
+                            }
                         }
                     '''
                 }
@@ -352,6 +369,11 @@ pipeline {
                     secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
                 ]]) {
                     powershell '''
+                        $env:AWS_DEFAULT_REGION = "${params.AWS_REGION}"
+                        if ("${params.AWS_SESSION_TOKEN}") {
+                            $env:AWS_SESSION_TOKEN = "${params.AWS_SESSION_TOKEN}"
+                        }
+
                         $service = "${env:SERVICE}"
                         $repo = "${env:DOCKERHUB_REPO}"
                         $tag = "${env:IMAGE_TAG}"
