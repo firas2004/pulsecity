@@ -71,7 +71,7 @@ pipeline {
         stage('1. Checkout Git') {
             steps {
                 echo "🚀 [1/10] Checkout du code source PulseCity..."
-                git branch: 'main', url: 'https://github.com/firas2004/pulsecity.git'
+                git branch: 'clean-main', url: 'https://github.com/firas2004/pulsecity.git'
                 powershell '''
                     if (-not (Test-Path "reports")) { New-Item -ItemType Directory -Path "reports" -Force | Out-Null }
                     if (-not (Test-Path "dist-packages")) { New-Item -ItemType Directory -Path "dist-packages" -Force | Out-Null }
