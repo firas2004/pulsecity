@@ -34,8 +34,8 @@ pipeline {
         )
         booleanParam(
             name: 'DEPLOY_TO_EKS',
-            defaultValue: true,
-            description: 'Activer le déploiement sur AWS EKS'
+            defaultValue: false,
+            description: 'Activer le déploiement sur AWS EKS (nécessite des identifiants AWS valides)'
         )
         string(
             name: 'NEXUS_URL',
@@ -321,6 +321,9 @@ pipeline {
 
         // ── 9. VERIFY AWS CREDENTIALS ────────────────────────────────────────
         stage('9. Verify AWS Credentials') {
+            when {
+                expression { params.DEPLOY_TO_EKS == true }
+            }
             steps {
                 echo "🔑 [9/10] Vérification des identifiants AWS..."
                 withCredentials([[
@@ -341,14 +344,10 @@ pipeline {
                             Write-Host $identity
                             Write-Host "✅ Identité AWS confirmée avec succès." -ForegroundColor Green
                         } else {
-                            Write-Host "⚠️ Attention: Le token AWS STS temporaire a expiré ou nécessite un rafraîchissement." -ForegroundColor Yellow
+                            Write-Host "❌ Erreur d'authentification AWS :" -ForegroundColor Red
                             Write-Host $identity
-                            if ("${params.DEPLOY_TO_EKS}" -eq "false") {
-                                Write-Host "Déploiement EKS désactivé (DEPLOY_TO_EKS=false) : étape non bloquante." -ForegroundColor Yellow
-                                $global:LASTEXITCODE = 0
-                            } else {
-                                Write-Error "Veuillez rafraîchir vos identifiants AWS temporaires (AWS Details > AWS CLI) pour autoriser le déploiement sur EKS."
-                            }
+                            Write-Host "Veuillez rafraîchir vos identifiants AWS temporaires (AWS Details > AWS CLI) pour autoriser le déploiement sur EKS." -ForegroundColor Yellow
+                            exit 1
                         }
                     '''
                 }
