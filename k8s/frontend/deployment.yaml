@@ -1,0 +1,74 @@
+---
+# ── PulseCity — Frontend Deployment ──────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pulsecity-frontend
+  namespace: default
+  labels:
+    app: pulsecity-frontend
+    project: pulsecity
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pulsecity-frontend
+  template:
+    metadata:
+      labels:
+        app: pulsecity-frontend
+        project: pulsecity
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101  # nginx user
+        runAsGroup: 101
+      containers:
+        - name: frontend
+          image: pulsecity-frontend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+          readinessProbe:
+            httpGet:
+              path: /nginx-health
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /nginx-health
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp-vol
+            - mountPath: /var/cache/nginx
+              name: cache-vol
+            - mountPath: /var/run
+              name: run-vol
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+              add:
+                - NET_BIND_SERVICE
+      volumes:
+        - name: tmp-vol
+          emptyDir: {}
+        - name: cache-vol
+          emptyDir: {}
+        - name: run-vol
+          emptyDir: {}
+
