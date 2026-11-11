@@ -57,16 +57,16 @@ SENSOR_TOPICS = {
     "energy": "energy-data",
 }
 NORMAL_RANGES = {
-    "traffic": (10, 120),
-    "air_co2": (350, 800),
-    "noise": (35, 75),
-    "energy": (50, 500),
+    "traffic": {"min": 10, "max": 120, 0: 10, 1: 120},
+    "air_co2": {"min": 350, "max": 800, 0: 350, 1: 800},
+    "noise": {"min": 35, "max": 75, 0: 35, 1: 75},
+    "energy": {"min": 50, "max": 500, 0: 50, 1: 500},
 }
 ANOMALY_RANGES = {
-    "traffic": (200, 400),
-    "air_co2": (1200, 2000),
-    "noise": (100, 130),
-    "energy": (900, 1500),
+    "traffic": {"min": 200, "max": 400, 0: 200, 1: 400},
+    "air_co2": {"min": 1200, "max": 2000, 0: 1200, 1: 2000},
+    "noise": {"min": 100, "max": 130, 0: 100, 1: 130},
+    "energy": {"min": 900, "max": 1500, 0: 900, 1: 1500},
 }
 
 FALLBACK_SENSORS = [

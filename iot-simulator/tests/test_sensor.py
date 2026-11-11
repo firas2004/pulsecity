@@ -5,9 +5,13 @@ Mock Kafka et prometheus_client pour que les tests tournent
 sans infrastructure externe.
 """
 
+import os
 import sys
 import pytest
 from unittest.mock import MagicMock, patch
+
+# Assurer que le dossier iot-simulator est dans sys.path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # ── Mocker les dépendances externes AVANT l'import de sensor ─────────────────
 sys.modules["kafka"]                      = MagicMock()
