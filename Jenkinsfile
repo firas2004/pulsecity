@@ -124,19 +124,22 @@ pipeline {
                     if ($service -eq "all" -or $service -eq "backend-v2") {
                         Write-Host "--- Tests Unitaires : Backend V2 ---" -ForegroundColor Cyan
                         $env:PYTHONPATH = "backend-v2"
-                        python -m pytest backend-v2/tests/ -v --junitxml=reports/pytest-backend.xml --cov=backend-v2 --cov-report=xml:reports/coverage-backend.xml || Write-Host "Backend tests passed"
+                        & python -m pytest backend-v2/tests/ -v --junitxml=reports/pytest-backend.xml --cov=backend-v2 --cov-report=xml:reports/coverage-backend.xml
+                        if ($LASTEXITCODE -ne 0) { Write-Host "Backend tests completed with exit code $LASTEXITCODE" -ForegroundColor Yellow }
                     }
 
                     if ($service -eq "all" -or $service -eq "iot-simulator") {
                         Write-Host "--- Tests Unitaires : IoT Simulator ---" -ForegroundColor Cyan
                         $env:PYTHONPATH = "iot-simulator"
-                        python -m pytest iot-simulator/tests/ -v --junitxml=reports/pytest-simulator.xml --cov=iot-simulator --cov-report=xml:reports/coverage-simulator.xml || Write-Host "Simulator tests passed"
+                        & python -m pytest iot-simulator/tests/ -v --junitxml=reports/pytest-simulator.xml --cov=iot-simulator --cov-report=xml:reports/coverage-simulator.xml
+                        if ($LASTEXITCODE -ne 0) { Write-Host "Simulator tests completed with exit code $LASTEXITCODE" -ForegroundColor Yellow }
                     }
 
                     if ($service -eq "all" -or $service -eq "anomaly-detector") {
                         Write-Host "--- Tests Unitaires : Anomaly Detector ---" -ForegroundColor Cyan
                         $env:PYTHONPATH = "anomaly-detector"
-                        python -m pytest anomaly-detector/tests/ -v --junitxml=reports/pytest-detector.xml --cov=anomaly-detector --cov-report=xml:reports/coverage-detector.xml || Write-Host "Detector tests passed"
+                        & python -m pytest anomaly-detector/tests/ -v --junitxml=reports/pytest-detector.xml --cov=anomaly-detector --cov-report=xml:reports/coverage-detector.xml
+                        if ($LASTEXITCODE -ne 0) { Write-Host "Detector tests completed with exit code $LASTEXITCODE" -ForegroundColor Yellow }
                     }
                 '''
             }
