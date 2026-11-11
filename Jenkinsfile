@@ -283,34 +283,43 @@ pipeline {
                         if (-not $token) { $token = "${env:DOCKER_TOKEN}" }
 
                         Write-Host "Connexion à Docker Hub en tant que $user..." -ForegroundColor Cyan
-                        $token | docker login -u $user --password-stdin
+                        & docker login -u "$user" -p "$token"
+                        if ($LASTEXITCODE -ne 0) {
+                            Write-Error "Échec de l'authentification Docker Hub."
+                            exit 1
+                        }
 
                         $service = "${env:SERVICE}"
                         $repo = "${env:DOCKERHUB_REPO}"
                         $tag = "${env:IMAGE_TAG}"
 
+                        function Push-Image($imageName) {
+                            Write-Host "Push $imageName..." -ForegroundColor Cyan
+                            & docker push "$imageName"
+                            if ($LASTEXITCODE -ne 0) {
+                                Write-Error "Échec du push pour $imageName"
+                                exit 1
+                            }
+                        }
+
                         if ($service -eq "all" -or $service -eq "backend-v2") {
-                            Write-Host "Push pulsecity-backend..." -ForegroundColor Cyan
-                            docker push "$repo/pulsecity-backend:$tag"
-                            docker push "$repo/pulsecity-backend:latest"
+                            Push-Image "$repo/pulsecity-backend:$tag"
+                            Push-Image "$repo/pulsecity-backend:latest"
                         }
 
                         if ($service -eq "all" -or $service -eq "frontend") {
-                            Write-Host "Push pulsecity-frontend..." -ForegroundColor Cyan
-                            docker push "$repo/pulsecity-frontend:$tag"
-                            docker push "$repo/pulsecity-frontend:latest"
+                            Push-Image "$repo/pulsecity-frontend:$tag"
+                            Push-Image "$repo/pulsecity-frontend:latest"
                         }
 
                         if ($service -eq "all" -or $service -eq "iot-simulator") {
-                            Write-Host "Push pulsecity-sensor..." -ForegroundColor Cyan
-                            docker push "$repo/pulsecity-sensor:$tag"
-                            docker push "$repo/pulsecity-sensor:latest"
+                            Push-Image "$repo/pulsecity-sensor:$tag"
+                            Push-Image "$repo/pulsecity-sensor:latest"
                         }
 
                         if ($service -eq "all" -or $service -eq "anomaly-detector") {
-                            Write-Host "Push pulsecity-anomaly-detector..." -ForegroundColor Cyan
-                            docker push "$repo/pulsecity-anomaly-detector:$tag"
-                            docker push "$repo/pulsecity-anomaly-detector:latest"
+                            Push-Image "$repo/pulsecity-anomaly-detector:$tag"
+                            Push-Image "$repo/pulsecity-anomaly-detector:latest"
                         }
 
                         Write-Host "✅ Images publiées avec succès sur Docker Hub." -ForegroundColor Green
