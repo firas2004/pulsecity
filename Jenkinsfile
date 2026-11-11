@@ -62,7 +62,7 @@ pipeline {
         NEXUS_PASS           = 'adelfiras78'
         
         // Docker Hub
-        DOCKERHUB_CREDS_ID   = 'foyer-dockerhub'
+        DOCKERHUB_CREDS_ID   = 'dockerhub-credentials'
         
         // AWS EKS
         AWS_CREDS_ID         = 'aws-credentials'
