@@ -48,6 +48,27 @@ FALLBACK_ZONES = ["Tunis-Centre", "Ariana", "Ben-Arous", "La-Marsa", "Sfax", "So
                   "Gabes", "Bizerte", "Kairouan", "Monastir", "Nabeul", "Medenine",
                   "Jendouba", "Gafsa", "Mahdia", "Tozeur", "Beja", "Siliana"]
 
+# ── Rétro-compatibilité pour tests unitaires ──────────────────────────────────
+ZONES = ["Tunis-Centre", "Ariana", "Ben-Arous", "La-Marsa", "Sfax", "Sousse"]
+SENSOR_TOPICS = {
+    "traffic": "traffic-data",
+    "air_co2": "air-quality",
+    "noise": "noise-level",
+    "energy": "energy-data",
+}
+NORMAL_RANGES = {
+    "traffic": (10, 120),
+    "air_co2": (350, 800),
+    "noise": (35, 75),
+    "energy": (50, 500),
+}
+ANOMALY_RANGES = {
+    "traffic": (200, 400),
+    "air_co2": (1200, 2000),
+    "noise": (100, 130),
+    "energy": (900, 1500),
+}
+
 FALLBACK_SENSORS = [
     # ── Original 4 ────────────────────────────────────────────────────────────
     {"type": "traffic",       "unit": "vehicles/min", "min_normal": 10,   "max_normal": 120,  "min_anomaly": 200,  "max_anomaly": 400},
@@ -144,8 +165,29 @@ def sensor_refresh_loop():
         time.sleep(SENSOR_REFRESH_S)
 
 
-def generate_reading(sensor: dict) -> dict:
-    """Génère une lecture réaliste pour un capteur donné."""
+def generate_reading(sensor, zone: str = None) -> dict:
+    """Génère une lecture réaliste pour un capteur donné (dict ou string pour tests)."""
+    if isinstance(sensor, str):
+        sensor_type = sensor
+        z = zone or "Tunis-Centre"
+        matching = [s for s in FALLBACK_SENSORS if s["type"] == sensor_type]
+        cfg = matching[0] if matching else FALLBACK_SENSORS[0]
+        sensor_dict = {
+            "id": f"{z.lower()}-{sensor_type}-001",
+            "type": sensor_type,
+            "city_id": z.lower(),
+            "unit": cfg["unit"],
+            "min_normal": cfg["min_normal"],
+            "max_normal": cfg["max_normal"],
+            "min_anomaly": cfg["min_anomaly"],
+            "max_anomaly": cfg["max_anomaly"],
+            "_zone_display": z,
+        }
+        return _generate_reading_internal(sensor_dict)
+    return _generate_reading_internal(sensor)
+
+
+def _generate_reading_internal(sensor: dict) -> dict:
     is_anomaly = random.random() < ANOMALY_PROB
     if is_anomaly:
         min_v = sensor.get("min_anomaly", 150.0)
