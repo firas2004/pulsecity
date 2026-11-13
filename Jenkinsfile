@@ -342,9 +342,10 @@ pipeline {
                     secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
                 ]]) {
                     powershell '''
-                        $env:AWS_DEFAULT_REGION = "${params.AWS_REGION}"
-                        if ("${params.AWS_SESSION_TOKEN}") {
-                            $env:AWS_SESSION_TOKEN = "${params.AWS_SESSION_TOKEN}"
+                        $region = if ($env:AWS_REGION) { $env:AWS_REGION } else { "us-east-1" }
+                        $env:AWS_DEFAULT_REGION = $region
+                        if ($env:AWS_SESSION_TOKEN) {
+                            Write-Host "Session token AWS detecte, utilisation en cours..." -ForegroundColor Cyan
                         }
 
                         Write-Host "Interrogation de AWS STS..." -ForegroundColor Cyan
@@ -377,17 +378,17 @@ pipeline {
                     secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
                 ]]) {
                     powershell '''
-                        $env:AWS_DEFAULT_REGION = "${params.AWS_REGION}"
-                        if ("${params.AWS_SESSION_TOKEN}") {
-                            $env:AWS_SESSION_TOKEN = "${params.AWS_SESSION_TOKEN}"
+                        $region = if ($env:AWS_REGION) { $env:AWS_REGION } else { "us-east-1" }
+                        $cluster = if ($env:EKS_CLUSTER_NAME) { $env:EKS_CLUSTER_NAME } else { "pulsecity-eks" }
+                        $ns = if ($env:K8S_NAMESPACE) { $env:K8S_NAMESPACE } else { "default" }
+                        $env:AWS_DEFAULT_REGION = $region
+                        if ($env:AWS_SESSION_TOKEN) {
+                            Write-Host "Session token AWS detecte." -ForegroundColor Cyan
                         }
 
-                        $service = "${env:SERVICE}"
-                        $repo = "${env:DOCKERHUB_REPO}"
-                        $tag = "${env:IMAGE_TAG}"
-                        $ns = "${params.K8S_NAMESPACE}"
-                        $region = "${params.AWS_REGION}"
-                        $cluster = "${params.EKS_CLUSTER_NAME}"
+                        $service = $env:SERVICE
+                        $repo = $env:DOCKERHUB_REPO
+                        $tag = $env:IMAGE_TAG
 
                         try {
                             Write-Host "Connexion à EKS : $cluster ($region)..." -ForegroundColor Cyan
