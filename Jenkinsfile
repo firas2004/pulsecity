@@ -19,12 +19,12 @@ pipeline {
         )
         string(
             name: 'AWS_REGION',
-            defaultValue: 'us-west-2',
+            defaultValue: 'us-east-1',
             description: 'Région AWS pour le cluster EKS'
         )
         string(
             name: 'EKS_CLUSTER_NAME',
-            defaultValue: 'pulsecity-eks-cluster',
+            defaultValue: 'pulsecity-eks',
             description: 'Nom du cluster AWS EKS'
         )
         string(
